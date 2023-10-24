@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models.dart';
 
 void main() {
@@ -34,7 +36,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: BlocProvider(
+        create: (context) => InsightCubit(AllUsersInsights(userInsights: {})),
+        child: const MyHomePage(
+          title: 'Insights App',
+        ),
+      ),
     );
   }
 }
@@ -115,7 +122,6 @@ class InsightsPage extends StatefulWidget {
 
 class _InsightsPageState extends State<InsightsPage> {
   final _controller = TextEditingController();
-  AllUsersInsights? _allUsersInsights;
 
   @override
   Widget build(BuildContext context) {
@@ -123,79 +129,84 @@ class _InsightsPageState extends State<InsightsPage> {
       appBar: AppBar(
         title: Text("Insights App"),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          TextFormField(
-            controller: _controller,
-            maxLines: 10,
-            decoration: InputDecoration(
-              hintText: 'Paste your JSON here',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadJson,
-            child: Text("Load JSON"),
-          ),
-          SizedBox(height: 16),
-          if (_allUsersInsights != null) ...[
-            for (var userId in _allUsersInsights!.userInsights.keys) ...[
-              Text("User: $userId"),
-              for (var insight
-                  in _allUsersInsights!.userInsights[userId]!.insights) ...[
-                ListTile(
-                  title: Text(insight.title),
-                  subtitle: Text(insight.insight),
+      body: BlocBuilder<InsightCubit, AllUsersInsights>(
+        builder: (context, state) {
+          return ListView(
+            padding: EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _controller,
+                maxLines: 10,
+                decoration: InputDecoration(
+                  hintText: 'Paste your JSON here',
+                  border: OutlineInputBorder(),
                 ),
-                DropdownButton<int>(
-                  value: insight.rating,
-                  onChanged: (int? newValue) {
-                    setState(() {
-                      insight.rating = newValue;
-                    });
-                  },
-                  items: <int>[1, 2, 3, 4, 5]
-                      .map<DropdownMenuItem<int>>((int value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList(),
-                  hint: Text('Rate this insight'),
-                ),
-                TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      insight.feedback = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Feedback',
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle saving the rating and feedback
-                  },
-                  child: Text("Save"),
-                ),
-                Text("Source Functions:"),
-                for (var sourceFunction in insight.sourceFunctions) ...[
-                  ListTile(
-                    title: Text(sourceFunction.name),
-                    // Add code here for Step 2
-                  ),
-                  DataTable(
-                    columns: _generateColumns(sourceFunction.sourceData),
-                    rows: _generateRows(sourceFunction.sourceData),
-                  )
-                ],
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadJson,
+                child: Text("Load JSON"),
+              ),
+              SizedBox(height: 16),
+              if (state.userInsights.isNotEmpty) ...[
+                for (var userId in state.userInsights.keys) ...[
+                  Text("User: $userId"),
+                  for (var insight in state.userInsights[userId]!.insights) ...[
+                    ListTile(
+                      title: Text(insight.title),
+                      subtitle: Text(insight.insight),
+                    ),
+                    DropdownButton<int>(
+                      value: insight.rating,
+                      onChanged: (int? newValue) {
+                        if (newValue != null) {
+                          context
+                              .read<InsightCubit>()
+                              .setRating(userId, insight, newValue);
+                        }
+                      },
+                      items: <int>[1, 2, 3, 4, 5]
+                          .map<DropdownMenuItem<int>>((int value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text(value.toString()),
+                        );
+                      }).toList(),
+                      hint: Text('Rate this insight'),
+                    ),
+                    TextField(
+                      onChanged: (value) {
+                        context
+                            .read<InsightCubit>()
+                            .setFeedback(userId, insight, value);
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Feedback',
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle saving the rating and feedback
+                      },
+                      child: Text("Save"),
+                    ),
+                    Text("Source Functions:"),
+                    for (var sourceFunction in insight.sourceFunctions) ...[
+                      ListTile(
+                        title: Text(sourceFunction.name),
+                        // Add code here for Step 2
+                      ),
+                      DataTable(
+                        columns: _generateColumns(sourceFunction.sourceData),
+                        rows: _generateRows(sourceFunction.sourceData),
+                      )
+                    ],
+                  ]
+                ]
               ]
-            ]
-          ]
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -220,8 +231,9 @@ class _InsightsPageState extends State<InsightsPage> {
     final jsonStr = _controller.text;
     final jsonData = json.decode(jsonStr) as Map<String, dynamic>;
 
-    setState(() {
-      _allUsersInsights = AllUsersInsights.fromJson(jsonData);
-    });
+    final newInsights = AllUsersInsights.fromJson(jsonData);
+
+    // Emit the new insights data to the InsightCubit
+    context.read<InsightCubit>().emit(newInsights);
   }
 }
