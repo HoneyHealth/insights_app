@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 void main() {
   final insightCubit = InsightCubit(AllUsersInsights(userInsights: {}));
@@ -23,12 +25,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Insights Review Application',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: JsonInputPage(),
+      home: const JsonInputPage(),
     );
   }
 }
@@ -42,7 +44,9 @@ class JsonInputPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Load Insights JSON"),
       ),
-      body: const JsonInputWidget(),
+      body: const Center(
+        child: JsonInputWidget(),
+      ),
     );
   }
 }
@@ -52,24 +56,40 @@ class _JsonInputWidgetState extends State<JsonInputWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextFormField(
-          controller: _controller,
-          maxLines: 10,
-          decoration: const InputDecoration(
-            hintText: 'Paste your JSON here',
-            border: OutlineInputBorder(),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 24,
+      ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: getValueForScreenType(
+            context: context,
+            mobile: 600,
+            tablet: 900,
+            desktop: 1200,
           ),
         ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () {
-            _loadJson(context);
-          },
-          child: const Text("Load JSON"),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _controller,
+              maxLines: 10,
+              decoration: const InputDecoration(
+                hintText: 'Paste your JSON here',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _loadJson(context);
+              },
+              child: const Text("Load JSON"),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -112,100 +132,257 @@ class InsightWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (insight.flag != null)
-          ListTile(
-            title: Text("Flagged for: ${insight.flag!.reason}"),
-            subtitle: insight.flag!.comment != null
-                ? Text("Comment: ${insight.flag!.comment}")
-                : null,
-            trailing: ElevatedButton(
-              onPressed: () {
-                context.read<InsightCubit>().removeFlag(userId, insight);
-              },
-              child: const Text("Unflag"),
-            ),
-          )
-        else
-          IconButton(
-            icon: Icon(Icons.flag),
-            onPressed: () => _showFlagOptions(context),
-          ),
-        SwitchListTile(
-          title: const Text('Launch Ready'),
-          value: insight.launchReady,
-          onChanged: insight.flag == null
-              ? (bool value) {
-                  context
-                      .read<InsightCubit>()
-                      .toggleLaunchReady(userId, insight);
-                }
-              : null, // Disable if flagged
-          subtitle: insight.flag != null
-              ? Text(
-                  'This insight is flagged. Resolve the flag before launching.')
-              : null,
-        ),
-        ListTile(
-          title: Text(insight.title),
-          subtitle: Text(insight.insight),
-        ),
-        RatingBar.builder(
-          initialRating: insight.rating ?? 0,
-          minRating: 0.5,
-          direction: Axis.horizontal,
-          allowHalfRating: true,
-          itemCount: 5,
-          itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          itemBuilder: (context, _) => Icon(
-            Icons.star,
-            color: Colors.amber,
-          ),
-          onRatingUpdate: (rating) {
-            context.read<InsightCubit>().setRating(userId, insight, rating);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Rating saved!")),
-            );
-          },
-        ),
-        TextField(
-          onChanged: (value) {
-            context.read<InsightCubit>().setFeedback(userId, insight, value);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Feedback saved!")),
-            );
-          },
-          decoration: const InputDecoration(
-            labelText: 'Feedback',
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            // Handle saving the rating and feedback
-          },
-          child: const Text("Save"),
-        ),
-        const Text("Source Functions:"),
-        for (var sourceFunction in insight.sourceFunctions) ...[
-          ListTile(
-            title: Text(sourceFunction.name),
-            // Add code here for Step 2
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: _generateColumns(sourceFunction.sourceData),
-                rows: _generateRows(sourceFunction.sourceData),
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 24,
+              ),
+              constraints: BoxConstraints(
+                maxWidth: getValueForScreenType(
+                  context: context,
+                  mobile: 600,
+                  tablet: 900,
+                  desktop: 1200,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SwitchListTile(
+                    title: const Text('Launch Ready'),
+                    value: insight.launchReady,
+                    onChanged: insight.flag == null
+                        ? (bool value) {
+                            context
+                                .read<InsightCubit>()
+                                .toggleLaunchReady(userId, insight);
+                          }
+                        : null, // Disable if flagged
+                    subtitle: insight.flag != null
+                        ? const Text(
+                            'This insight is flagged. Resolve the flag before launching.')
+                        : const Text(''),
+                  ),
+                  Card(
+                    child: ListTile(
+                      title: Text(insight.title),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(insight.insight),
+                          const SizedBox(height: 8.0),
+                          const Text(
+                            "Next Steps:",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(insight.nextSteps),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                    child: Divider(),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      RatingBar.builder(
+                        initialRating: insight.rating ?? 0,
+                        minRating: 0.5,
+                        direction: Axis.horizontal,
+                        allowHalfRating: true,
+                        itemCount: 5,
+                        itemPadding:
+                            const EdgeInsets.symmetric(horizontal: 4.0),
+                        itemBuilder: (context, _) => const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                        ),
+                        onRatingUpdate: (rating) {
+                          context
+                              .read<InsightCubit>()
+                              .setRating(userId, insight, rating);
+                        },
+                      ),
+                      SizedBox(
+                        height: 58,
+                        child: Row(
+                          children: [
+                            if (insight.flag != null)
+                              IntrinsicWidth(
+                                child: ListTile(
+                                  title: Text(
+                                      "Flagged for: ${insight.flag!.reason}"),
+                                  subtitle: insight.flag!.comment != null
+                                      ? Text(
+                                          "Comment: ${insight.flag!.comment}")
+                                      : null,
+                                ),
+                              ),
+                            MenuAnchor(
+                              alignmentOffset: const Offset(-70, 0),
+                              menuChildren: [
+                                MenuItemButton(
+                                  child: const Text("Inaccurate"),
+                                  onPressed: () {
+                                    context.read<InsightCubit>().flagInsight(
+                                        userId, insight, "Inaccurate");
+                                  },
+                                ),
+                                MenuItemButton(
+                                  child: const Text("Irrelevant"),
+                                  onPressed: () {
+                                    context.read<InsightCubit>().flagInsight(
+                                        userId, insight, "Irrelevant");
+                                  },
+                                ),
+                                MenuItemButton(
+                                  child: const Text("Other"),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        final commentController =
+                                            TextEditingController();
+                                        return AlertDialog(
+                                          title: const Text("Comment"),
+                                          content: TextFormField(
+                                            controller: commentController,
+                                            maxLines: 5,
+                                            decoration: const InputDecoration(
+                                              hintText:
+                                                  "Optionally enter more details on why this insight is flagged as other",
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                          actions: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                context
+                                                    .read<InsightCubit>()
+                                                    .flagInsight(
+                                                        userId,
+                                                        insight,
+                                                        'Other',
+                                                        commentController.text);
+                                                Navigator.pop(
+                                                    context); // close comment dialog
+                                              },
+                                              child: const Text("Submit"),
+                                            )
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                              builder: (context, controller, child) =>
+                                  AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: insight.flag == null
+                                    ? IconButton(
+                                        key: const ValueKey('flag_outlined'),
+                                        icon: const Icon(Icons.flag_outlined),
+                                        tooltip: "Flag Insight",
+                                        onPressed: () {
+                                          if (controller.isOpen) {
+                                            controller.close();
+                                          } else {
+                                            controller.open();
+                                          }
+                                        })
+                                    : IconButton(
+                                        key: const ValueKey(
+                                            'flag_circle_rounded'),
+                                        onPressed: () {
+                                          context
+                                              .read<InsightCubit>()
+                                              .removeFlag(userId, insight);
+                                        },
+                                        tooltip: "Remove insight flag",
+                                        icon: const Icon(
+                                          Icons.flag_rounded,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  TextFormField(
+                    onChanged: (value) {
+                      context
+                          .read<InsightCubit>()
+                          .setComment(userId, insight, value);
+                    },
+                    maxLines: 10,
+                    decoration: const InputDecoration(
+                      labelText: 'Comments',
+                      alignLabelWithHint: true,
+                      hintText: 'Optional',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  Text(
+                    "Source Functions:",
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ],
               ),
             ),
-          )
-        ],
-      ],
+            for (var sourceFunction in insight.sourceFunctions) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
+                constraints: BoxConstraints(
+                  maxWidth: getValueForScreenType(
+                    context: context,
+                    mobile: 600,
+                    tablet: 900,
+                    desktop: 1200,
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(sourceFunction.name),
+                  // Add code here for Step 2
+                ),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: _generateColumns(sourceFunction.sourceData),
+                    rows: _generateRows(sourceFunction.sourceData),
+                  ),
+                ),
+              )
+            ],
+            const SizedBox(
+              height: 132,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -213,12 +390,12 @@ class InsightWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Flag Reason"),
+        title: const Text("Flag Reason"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: Text("Inaccurate"),
+              title: const Text("Inaccurate"),
               onTap: () {
                 context
                     .read<InsightCubit>()
@@ -227,7 +404,7 @@ class InsightWidget extends StatelessWidget {
               },
             ),
             ListTile(
-              title: Text("Irrelevant"),
+              title: const Text("Irrelevant"),
               onTap: () {
                 context
                     .read<InsightCubit>()
@@ -236,29 +413,31 @@ class InsightWidget extends StatelessWidget {
               },
             ),
             ListTile(
-              title: Text("Other"),
+              title: const Text("Other"),
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    final _commentController = TextEditingController();
+                    final commentController = TextEditingController();
                     return AlertDialog(
-                      title: Text("Comment"),
-                      content: TextField(
-                        controller: _commentController,
-                        decoration: InputDecoration(
+                      title: const Text("Comment"),
+                      content: TextFormField(
+                        controller: commentController,
+                        maxLines: 5,
+                        decoration: const InputDecoration(
                           hintText: "Enter your comment here",
+                          border: OutlineInputBorder(),
                         ),
                       ),
                       actions: [
                         ElevatedButton(
                           onPressed: () {
                             context.read<InsightCubit>().flagInsight(userId,
-                                insight, 'Other', _commentController.text);
+                                insight, 'Other', commentController.text);
                             Navigator.pop(context); // close comment dialog
                             Navigator.pop(context); // close flag options dialog
                           },
-                          child: Text("Submit"),
+                          child: const Text("Submit"),
                         )
                       ],
                     );
@@ -273,7 +452,7 @@ class InsightWidget extends StatelessWidget {
   }
 
   List<DataColumn> _generateColumns(Map<String, dynamic> sourceData) {
-    var columns = [DataColumn(label: Text(''))];
+    var columns = [const DataColumn(label: Text(''))];
     columns.addAll(sourceData.keys.map((key) => DataColumn(label: Text(key))));
     return columns;
   }
@@ -285,7 +464,13 @@ class InsightWidget extends StatelessWidget {
     return firstEntry.keys.map((originalColumn) {
       var cells = [
         DataCell(
-            Text(originalColumn, style: TextStyle(fontWeight: FontWeight.bold)))
+          Text(
+            originalColumn,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )
       ]; // Bolded the text
       cells.addAll(sourceData.entries.map((entry) {
         var value = (entry.value as Map<String, dynamic>)[originalColumn];
@@ -335,11 +520,29 @@ class UserInsightsPage extends StatefulWidget {
   const UserInsightsPage({required this.userId, super.key});
 
   @override
-  _UserInsightsPageState createState() => _UserInsightsPageState();
+  State<UserInsightsPage> createState() => _UserInsightsPageState();
 }
 
 class _UserInsightsPageState extends State<UserInsightsPage> {
   int currentInsightIndex = 0;
+
+  String getUserProgressText() {
+    final cubit = context.read<InsightCubit>();
+    final allUsers = cubit.state.userInsights.keys.toList();
+    final currentUserIndex = allUsers.indexOf(widget.userId);
+
+    return "${currentUserIndex + 1}/${allUsers.length} users";
+  }
+
+  String getInsightProgressText() {
+    final insights = context
+            .read<InsightCubit>()
+            .state
+            .userInsights[widget.userId]
+            ?.insights ??
+        [];
+    return "${currentInsightIndex + 1}/${insights.length} insights";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -351,45 +554,84 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
         builder: (context, state) {
           var insights = state.userInsights[widget.userId]?.insights ?? [];
 
-          if (insights.isEmpty) return Text("No insights available.");
+          if (insights.isEmpty) return const Text("No insights available.");
 
           return Column(
             children: [
-              InsightWidget(widget.userId, insights[currentInsightIndex]),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (currentInsightIndex > 0)
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          currentInsightIndex--;
-                        });
-                      },
-                      child: Text("Previous"),
-                    ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (currentInsightIndex < insights.length - 1) {
-                        setState(() {
-                          currentInsightIndex++;
-                        });
-                      } else {
-                        // Otherwise, navigate to summary for the current user
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                InsightSummaryPage(userId: widget.userId),
+              Expanded(
+                child:
+                    InsightWidget(widget.userId, insights[currentInsightIndex]),
+              ),
+              BottomAppBar(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: min(
+                          MediaQuery.of(context).size.width - 32,
+                          getValueForScreenType(
+                            context: context,
+                            mobile: 600 - 32,
+                            tablet: 900 - 32,
+                            desktop: 1200 - 32,
                           ),
-                        );
-                      }
-                    },
-                    child: Text(currentInsightIndex < insights.length - 1
-                        ? "Next"
-                        : "Summary"),
-                  ),
-                ],
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (currentInsightIndex > 0)
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      currentInsightIndex--;
+                                    });
+                                  },
+                                  child: const Text("Previous"),
+                                )
+                              else
+                                const SizedBox.shrink(),
+                              Text(getUserProgressText(),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              Text(getInsightProgressText(),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (currentInsightIndex <
+                                      insights.length - 1) {
+                                    setState(() {
+                                      currentInsightIndex++;
+                                    });
+                                  } else {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            InsightSummaryPage(
+                                                userId: widget.userId),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Text(
+                                    currentInsightIndex < insights.length - 1
+                                        ? "Next"
+                                        : "Summary"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           );
@@ -408,7 +650,7 @@ class InsightSummaryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Summary for ${userId}"),
+        title: Text("Summary for $userId"),
       ),
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
@@ -433,6 +675,11 @@ class InsightSummaryPage extends StatelessWidget {
                     const SizedBox(width: 10),
                     if (insight.launchReady)
                       const Icon(Icons.launch, color: Colors.green),
+                    if (insight.flag != null)
+                      const Icon(
+                        Icons.flag_rounded,
+                        color: Colors.red,
+                      ),
                   ],
                 ),
               );
@@ -465,7 +712,7 @@ class InsightSummaryPage extends StatelessWidget {
             );
           }
         },
-        child: Icon(Icons.arrow_forward),
+        child: const Icon(Icons.arrow_forward),
       ),
     );
   }
@@ -478,7 +725,7 @@ class OverallInsightSummaryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Overall Insights Summary"),
+        title: const Text("Overall Insights Summary"),
       ),
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
@@ -505,6 +752,11 @@ class OverallInsightSummaryPage extends StatelessWidget {
                         const SizedBox(width: 10),
                         if (insight.launchReady)
                           const Icon(Icons.launch, color: Colors.green),
+                        if (insight.flag != null)
+                          const Icon(
+                            Icons.flag_rounded,
+                            color: Colors.red,
+                          ),
                       ],
                     ),
                   );

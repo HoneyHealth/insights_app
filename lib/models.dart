@@ -23,7 +23,7 @@ class Insight {
   final String lastGlucoseDataPointTimestampForInsight;
   double? rating;
 
-  String? feedback; // can be null if no feedback given
+  String? comment; // can be null if no feedback given
   bool launchReady; // New property
   Flag? flag; // This will be non-null if the insight is flagged
 
@@ -35,7 +35,7 @@ class Insight {
     required this.sourceFunctions,
     required this.lastGlucoseDataPointTimestampForInsight,
     this.rating,
-    this.feedback,
+    this.comment,
     this.launchReady = false, // Default value
     this.flag,
   });
@@ -52,7 +52,7 @@ class Insight {
       lastGlucoseDataPointTimestampForInsight:
           json['last_glucose_data_point_timestamp_for_insight'],
       rating: json['rating'],
-      feedback: json['feedback'],
+      comment: json['feedback'],
       launchReady: json['launch_ready'] ?? false,
       flag: json['flag'] != null
           ? Flag(

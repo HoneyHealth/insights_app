@@ -20,14 +20,14 @@ class InsightCubit extends Cubit<AllUsersInsights> {
     emit(insightsCopy);
   }
 
-  void setFeedback(String userId, Insight insight, String feedback) {
+  void setComment(String userId, Insight insight, String comment) {
     final insightsCopy =
         AllUsersInsights(userInsights: {...state.userInsights});
 
     final userInsights = insightsCopy.userInsights[userId];
     final targetInsight =
         userInsights!.insights.firstWhere((i) => i == insight);
-    targetInsight.feedback = feedback;
+    targetInsight.comment = comment;
 
     emit(insightsCopy);
   }
