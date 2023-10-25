@@ -21,8 +21,11 @@ class Insight {
   final String nextSteps;
   final List<SourceFunction> sourceFunctions;
   final String lastGlucoseDataPointTimestampForInsight;
-  int? rating; // can be null if not rated
+  double? rating;
+
   String? feedback; // can be null if no feedback given
+  bool launchReady; // New property
+  Flag? flag; // This will be non-null if the insight is flagged
 
   Insight({
     required this.steps,
@@ -33,6 +36,8 @@ class Insight {
     required this.lastGlucoseDataPointTimestampForInsight,
     this.rating,
     this.feedback,
+    this.launchReady = false, // Default value
+    this.flag,
   });
 
   factory Insight.fromJson(Map<String, dynamic> json) {
@@ -48,6 +53,11 @@ class Insight {
           json['last_glucose_data_point_timestamp_for_insight'],
       rating: json['rating'],
       feedback: json['feedback'],
+      launchReady: json['launch_ready'] ?? false,
+      flag: json['flag'] != null
+          ? Flag(
+              reason: json['flag']['reason'], comment: json['flag']['comment'])
+          : null,
     );
   }
 }
@@ -80,4 +90,11 @@ class AllUsersInsights {
 
     return AllUsersInsights(userInsights: userInsights);
   }
+}
+
+class Flag {
+  final String reason;
+  final String? comment; // Optional comment for "Other" reason
+
+  Flag({required this.reason, this.comment});
 }
