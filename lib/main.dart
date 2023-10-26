@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:insights_app/insights_cubit.dart';
@@ -768,7 +770,7 @@ class OverallInsightSummaryPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _exportToJson(context);
+          _showExportConfigDialog(context);
         },
         child: const Icon(Icons.download),
         tooltip: "Export to JSON",
@@ -776,12 +778,11 @@ class OverallInsightSummaryPage extends StatelessWidget {
     );
   }
 
-  void _exportToJson(BuildContext context) async {
-    final config = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ExportConfigPage(config: ExportConfig()),
-      ),
+  Future<void> _showExportConfigDialog(BuildContext context) async {
+    final config = await showDialog<ExportConfig>(
+      context: context,
+      builder: (BuildContext context) =>
+          ExportConfigPage(config: ExportConfig()),
     );
 
     if (config != null) {
@@ -789,19 +790,10 @@ class OverallInsightSummaryPage extends StatelessWidget {
           _applyExportConfig(config, context.read<InsightCubit>().state);
       final jsonString = jsonEncode(modifiedState.toJson());
 
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Exported JSON"),
-          content: SingleChildScrollView(
-            child: SelectableText(jsonString),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Close"),
-            ),
-          ],
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ExportedJsonPage(jsonString: jsonString),
         ),
       );
     }
@@ -876,43 +868,51 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Export Configuration"),
+    return AlertDialog(
+      title: Text('Export Configuration'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: [
+            SwitchListTile(
+              title: Text("Insights"),
+              value: config.insights,
+              onChanged: (value) {
+                setState(() {
+                  config.toggleInsights(value);
+                });
+              },
+            ),
+            buildChildTile(
+                "User Insight", config.userInsight, config.toggleUserInsight),
+            buildChildTile("Title", config.title,
+                (value) => setState(() => config.title = value), 2),
+            buildChildTile("Insight", config.insightText,
+                (value) => setState(() => config.insightText = value), 2),
+            buildChildTile("Next Steps", config.nextSteps,
+                (value) => setState(() => config.nextSteps = value), 2),
+            buildChildTile("Source Functions", config.sourceFunctions,
+                config.toggleSourceFunctions, 2),
+            buildChildTile("Source Name", config.sourceName,
+                (value) => setState(() => config.sourceName = value), 4),
+            buildChildTile("Source Data", config.sourceData,
+                (value) => setState(() => config.sourceData = value), 4),
+          ],
+        ),
       ),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            title: Text("Insights"),
-            value: config.insights,
-            onChanged: (value) {
-              setState(() {
-                config.toggleInsights(value);
-              });
-            },
-          ),
-          buildChildTile(
-              "User Insight", config.userInsight, config.toggleUserInsight),
-          buildChildTile("Title", config.title,
-              (value) => setState(() => config.title = value), 2),
-          buildChildTile("Insight", config.insightText,
-              (value) => setState(() => config.insightText = value), 2),
-          buildChildTile("Next Steps", config.nextSteps,
-              (value) => setState(() => config.nextSteps = value), 2),
-          buildChildTile("Source Functions", config.sourceFunctions,
-              config.toggleSourceFunctions, 2),
-          buildChildTile("Source Name", config.sourceName,
-              (value) => setState(() => config.sourceName = value), 4),
-          buildChildTile("Source Data", config.sourceData,
-              (value) => setState(() => config.sourceData = value), 4),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.check),
-        onPressed: () {
-          Navigator.pop(context, config);
-        },
-      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(config);
+          },
+          child: Text('Export'),
+        ),
+      ],
     );
   }
 
@@ -929,6 +929,89 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
           onChanged(value);
         });
       },
+    );
+  }
+}
+
+class ExportedJsonPage extends StatefulWidget {
+  final String jsonString;
+
+  const ExportedJsonPage({required this.jsonString, super.key});
+
+  @override
+  State<ExportedJsonPage> createState() => _ExportedJsonPageState();
+}
+
+class _ExportedJsonPageState extends State<ExportedJsonPage> {
+  bool _copied = false;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Exported JSON"),
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: getValueForScreenType(
+                context: context,
+                mobile: 600,
+                tablet: 900,
+                desktop: 1200,
+              ),
+            ),
+            padding: const EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 8.0,
+              bottom: 132,
+            ),
+            child: SelectableText(
+              JsonEncoder.withIndent('  ').convert(
+                json.decode(widget.jsonString),
+              ),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Clipboard.setData(ClipboardData(text: widget.jsonString));
+          setState(() {
+            _copied = true;
+          });
+          Timer(Duration(seconds: 5), () {
+            setState(() {
+              _copied = false;
+            });
+          });
+        },
+        label: AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: _copied
+              ? Row(
+                  key: ValueKey<int>(
+                      1), // To ensure the AnimatedSwitcher recognizes the change
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check, color: Colors.green),
+                    SizedBox(width: 5),
+                    Text("Copied"),
+                  ],
+                )
+              : Row(
+                  key: ValueKey<int>(
+                      2), // To ensure the AnimatedSwitcher recognizes the change
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.copy),
+                    SizedBox(width: 5),
+                    Text("Copy JSON"),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }
