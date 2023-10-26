@@ -3,6 +3,7 @@ import 'package:insights_app/models.dart';
 
 class InsightCubit extends Cubit<AllUsersInsights> {
   InsightCubit(AllUsersInsights initialState) : super(initialState);
+  ExportConfig exportConfig = ExportConfig();
 
   void updateInsights(AllUsersInsights insights) {
     emit(insights);

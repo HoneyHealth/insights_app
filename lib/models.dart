@@ -13,9 +13,17 @@ class UserInsight {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'insights': insights.map((e) => e.toJson()).toList(),
-      };
+  Map<String, dynamic> toJson([ExportConfig? config]) {
+    Map<String, dynamic> result = {};
+
+    if (config == null ||
+        config.userInsight == CheckState.checked ||
+        config.userInsight == CheckState.halfChecked) {
+      result['insights'] = insights.map((e) => e.toJson(config)).toList();
+    }
+
+    return result;
+  }
 }
 
 class Insight {
@@ -65,19 +73,28 @@ class Insight {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'steps': steps,
-        'title': title,
-        'insight': insight,
-        'next_steps': nextSteps,
-        'source_functions': sourceFunctions.map((e) => e.toJson()).toList(),
-        'last_glucose_data_point_timestamp_for_insight':
-            lastGlucoseDataPointTimestampForInsight,
-        'rating': rating,
-        'comment': comment,
-        'launch_ready': launchReady,
-        'flag': flag?.toJson(),
-      };
+  Map<String, dynamic> toJson([ExportConfig? config]) {
+    Map<String, dynamic> result = {};
+
+    if (config == null || config.title == CheckState.checked) {
+      result['title'] = title;
+    }
+    if (config == null || config.insightText == CheckState.checked) {
+      result['insight'] = insight;
+    }
+    if (config == null || config.nextSteps == CheckState.checked) {
+      result['next_steps'] = nextSteps;
+    }
+
+    if (config == null ||
+        config.sourceFunctions == CheckState.checked ||
+        config.sourceFunctions == CheckState.halfChecked) {
+      result['source_functions'] =
+          sourceFunctions.map((e) => e.toJson(config)).toList();
+    }
+
+    return result;
+  }
 }
 
 class SourceFunction {
@@ -93,10 +110,18 @@ class SourceFunction {
             json.decode(jsonData['source_data']) as Map<String, dynamic>);
   }
 
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'source_data': json.encode(sourceData),
-      };
+  Map<String, dynamic> toJson([ExportConfig? config]) {
+    Map<String, dynamic> result = {};
+
+    if (config == null || config.sourceName == CheckState.checked) {
+      result["name"] = name;
+    }
+    if (config == null || config.sourceData == CheckState.checked) {
+      result['source_data'] = sourceData;
+    }
+
+    return result;
+  }
 }
 
 class AllUsersInsights {
@@ -114,8 +139,18 @@ class AllUsersInsights {
     return AllUsersInsights(userInsights: userInsights);
   }
 
-  Map<String, dynamic> toJson() =>
-      userInsights.map((k, v) => MapEntry(k, v.toJson()));
+  Map<String, dynamic> toJson([ExportConfig? config]) {
+    Map<String, dynamic> result = {};
+
+    if (config == null ||
+        config.insights == CheckState.checked ||
+        config.insights == CheckState.halfChecked) {
+      result["insights"] =
+          userInsights.map((k, v) => MapEntry(k, v.toJson(config)));
+    }
+
+    return result;
+  }
 }
 
 class Flag {
@@ -130,44 +165,105 @@ class Flag {
       };
 }
 
+enum CheckState {
+  unchecked,
+  checked,
+  halfChecked,
+}
+
 class ExportConfig {
-  bool insights = true;
-  bool userInsight = true;
-  bool title = true;
-  bool insightText = true; // Renamed from 'insight' for clarity
-  bool nextSteps = true;
-  bool sourceFunctions = true;
-  bool sourceName = true;
-  bool sourceData = true;
+  CheckState insights = CheckState.unchecked;
+  CheckState userInsight = CheckState.unchecked;
+  CheckState title = CheckState.unchecked;
+  CheckState insightText = CheckState.unchecked;
+  CheckState nextSteps = CheckState.unchecked;
+  CheckState sourceFunctions = CheckState.unchecked;
+  CheckState sourceName = CheckState.unchecked;
+  CheckState sourceData = CheckState.unchecked;
 
-  // Methods to handle the logic of selecting and deselecting parent and child nodes
-  void toggleInsights(bool value) {
-    insights = value;
-    if (value) {
-      userInsight = true;
-      toggleUserInsight(true);
+  void toggleItem(CheckState value, String itemName) {
+    switch (itemName) {
+      case 'insights':
+        insights = value;
+        _updateChildStates(value, ['userInsight']);
+        break;
+      case 'userInsight':
+        userInsight = value;
+        _updateChildStates(
+            value, ['title', 'insightText', 'nextSteps', 'sourceFunctions']);
+        _updateParentState('insights', [userInsight]);
+        break;
+      case 'title':
+        title = value;
+        _updateParentState(
+            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        break;
+      case 'insightText':
+        insightText = value;
+        _updateParentState(
+            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        break;
+      case 'nextSteps':
+        nextSteps = value;
+        _updateParentState(
+            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        break;
+      case 'sourceFunctions':
+        sourceFunctions = value;
+        _updateChildStates(value, ['sourceName', 'sourceData']);
+        _updateParentState(
+            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        break;
+      case 'sourceName':
+        sourceName = value;
+        _updateParentState('sourceFunctions', [sourceName, sourceData]);
+        break;
+      case 'sourceData':
+        sourceData = value;
+        _updateParentState('sourceFunctions', [sourceName, sourceData]);
+        break;
     }
   }
 
-  void toggleUserInsight(bool value) {
-    userInsight = value;
-    if (value) {
-      title = true;
-      insightText = true;
-      nextSteps = true;
-      sourceFunctions = true;
-      toggleSourceFunctions(true);
+  void _updateChildStates(CheckState parentValue, List<String> childNames) {
+    for (var child in childNames) {
+      toggleItem(parentValue, child);
     }
   }
 
-  void toggleSourceFunctions(bool value) {
-    sourceFunctions = value;
-    if (value) {
-      sourceName = true;
-      sourceData = true;
+  void _updateParentState(String parentName, List<CheckState> childStates) {
+    int checkedCount = childStates
+        .where((element) =>
+            element == CheckState.checked || element == CheckState.halfChecked)
+        .length;
+    CheckState newParentState;
+    if (checkedCount == childStates.length) {
+      newParentState = CheckState.checked;
+    } else if (checkedCount == 0) {
+      newParentState = CheckState.unchecked;
     } else {
-      sourceName = false;
-      sourceData = false;
+      newParentState = CheckState.halfChecked;
+    }
+
+    switch (parentName) {
+      case 'userInsight':
+        if (userInsight != newParentState) {
+          userInsight = newParentState;
+        }
+        _updateParentState('insights', [userInsight]);
+        break;
+      case 'sourceFunctions':
+        if (sourceFunctions != newParentState) {
+          sourceFunctions = newParentState;
+        }
+        _updateParentState(
+            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        break;
+      case 'insights':
+        if (insights != newParentState) {
+          insights = newParentState;
+        }
+        break;
     }
   }
 }

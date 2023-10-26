@@ -769,9 +769,7 @@ class OverallInsightSummaryPage extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showExportConfigDialog(context);
-        },
+        onPressed: () => _showExportConfigDialog(context),
         child: const Icon(Icons.download),
         tooltip: "Export to JSON",
       ),
@@ -779,16 +777,19 @@ class OverallInsightSummaryPage extends StatelessWidget {
   }
 
   Future<void> _showExportConfigDialog(BuildContext context) async {
+    final cubit = context.read<InsightCubit>();
     final config = await showDialog<ExportConfig>(
       context: context,
       builder: (BuildContext context) =>
-          ExportConfigPage(config: ExportConfig()),
+          ExportConfigPage(config: cubit.exportConfig), // Updated this line
     );
 
     if (config != null) {
-      final modifiedState =
-          _applyExportConfig(config, context.read<InsightCubit>().state);
-      final jsonString = jsonEncode(modifiedState.toJson());
+      // Update the cubit's exportConfig
+      cubit.exportConfig = config;
+      // Directly use the config in the toJson method
+      final jsonString =
+          jsonEncode(context.read<InsightCubit>().state.toJson(config));
 
       Navigator.push(
         context,
@@ -798,54 +799,6 @@ class OverallInsightSummaryPage extends StatelessWidget {
       );
     }
   }
-}
-
-AllUsersInsights _applyExportConfig(
-    ExportConfig config, AllUsersInsights originalState) {
-  // Check if insights is selected
-  if (!config.insights) return AllUsersInsights(userInsights: {});
-
-  // Clone the original state
-  final clonedState = AllUsersInsights(
-    userInsights: Map.fromEntries(
-      originalState.userInsights.entries.map(
-        (e) => MapEntry(
-          e.key,
-          UserInsight(
-            insights: e.value.insights.map(
-              (insight) {
-                return Insight(
-                  steps: insight.steps,
-                  title: config.title ? insight.title : '',
-                  insight: config.insightText ? insight.insight : '',
-                  nextSteps: config.nextSteps ? insight.nextSteps : '',
-                  sourceFunctions: config.sourceFunctions
-                      ? insight.sourceFunctions.map(
-                          (sf) {
-                            return SourceFunction(
-                              name: config.sourceName ? sf.name : '',
-                              sourceData:
-                                  config.sourceData ? sf.sourceData : {},
-                            );
-                          },
-                        ).toList()
-                      : [],
-                  lastGlucoseDataPointTimestampForInsight:
-                      insight.lastGlucoseDataPointTimestampForInsight,
-                  rating: insight.rating,
-                  comment: insight.comment,
-                  launchReady: insight.launchReady,
-                  flag: insight.flag,
-                );
-              },
-            ).toList(),
-          ),
-        ),
-      ),
-    ),
-  );
-
-  return clonedState;
 }
 
 class ExportConfigPage extends StatefulWidget {
@@ -873,29 +826,16 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
       content: SingleChildScrollView(
         child: ListBody(
           children: [
-            SwitchListTile(
-              title: Text("Insights"),
-              value: config.insights,
-              onChanged: (value) {
-                setState(() {
-                  config.toggleInsights(value);
-                });
-              },
-            ),
+            buildChildTile("Insights", config.insights, 'insights'),
             buildChildTile(
-                "User Insight", config.userInsight, config.toggleUserInsight),
-            buildChildTile("Title", config.title,
-                (value) => setState(() => config.title = value), 2),
-            buildChildTile("Insight", config.insightText,
-                (value) => setState(() => config.insightText = value), 2),
-            buildChildTile("Next Steps", config.nextSteps,
-                (value) => setState(() => config.nextSteps = value), 2),
+                "User Insight", config.userInsight, 'userInsight', 1),
+            buildChildTile("Title", config.title, 'title', 2),
+            buildChildTile("Insight", config.insightText, 'insightText', 2),
+            buildChildTile("Next Steps", config.nextSteps, 'nextSteps', 2),
             buildChildTile("Source Functions", config.sourceFunctions,
-                config.toggleSourceFunctions, 2),
-            buildChildTile("Source Name", config.sourceName,
-                (value) => setState(() => config.sourceName = value), 4),
-            buildChildTile("Source Data", config.sourceData,
-                (value) => setState(() => config.sourceData = value), 4),
+                'sourceFunctions', 2),
+            buildChildTile("Source Name", config.sourceName, 'sourceName', 3),
+            buildChildTile("Source Data", config.sourceData, 'sourceData', 3),
           ],
         ),
       ),
@@ -908,6 +848,7 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
         ),
         TextButton(
           onPressed: () {
+            // Save the export config and close the dialog
             Navigator.of(context).pop(config);
           },
           child: Text('Export'),
@@ -916,20 +857,43 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
     );
   }
 
-  Widget buildChildTile(String title, bool value, Function(bool) onChanged,
-      [int indentFactor = 1]) {
-    return SwitchListTile(
-      title: Padding(
-        padding: EdgeInsets.only(left: 24.0 * indentFactor),
-        child: Text(title),
-      ),
-      value: value,
-      onChanged: (value) {
+  Widget buildChildTile(String title, CheckState checkState, String itemName,
+      [int indentLevel = 0]) {
+    return ListTile(
+      contentPadding: EdgeInsets.only(left: 20.0 * indentLevel),
+      leading: _buildCheckbox(checkState),
+      title: Text(title),
+      onTap: () {
         setState(() {
-          onChanged(value);
+          config.toggleItem(_toggleCheckState(checkState), itemName);
         });
       },
     );
+  }
+
+  Widget _buildCheckbox(CheckState checkState) {
+    bool? isChecked;
+    if (checkState == CheckState.checked) {
+      isChecked = true;
+    } else if (checkState == CheckState.halfChecked) {
+      isChecked = null;
+    } else {
+      isChecked = false;
+    }
+
+    return Checkbox(
+      value: isChecked,
+      onChanged: (val) {},
+      tristate: true, // Enables the checkbox to have three states
+    );
+  }
+
+  CheckState _toggleCheckState(CheckState current) {
+    if (current == CheckState.checked) {
+      return CheckState.unchecked;
+    } else {
+      return CheckState.checked;
+    }
   }
 }
 
@@ -1007,7 +971,7 @@ class _ExportedJsonPageState extends State<ExportedJsonPage> {
                   children: [
                     Icon(Icons.copy),
                     SizedBox(width: 5),
-                    Text("Copy JSON"),
+                    Text("Copy"),
                   ],
                 ),
         ),
