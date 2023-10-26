@@ -766,6 +766,33 @@ class OverallInsightSummaryPage extends StatelessWidget {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _exportToJson(context);
+        },
+        child: const Icon(Icons.download),
+        tooltip: "Export to JSON",
+      ),
+    );
+  }
+
+  void _exportToJson(BuildContext context) {
+    final jsonString = jsonEncode(context.read<InsightCubit>().state.toJson());
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Exported JSON"),
+        content: SingleChildScrollView(
+          child: SelectableText(jsonString),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
     );
   }
 }

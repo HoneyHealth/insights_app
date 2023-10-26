@@ -12,6 +12,10 @@ class UserInsight {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'insights': insights.map((e) => e.toJson()).toList(),
+      };
 }
 
 class Insight {
@@ -60,6 +64,20 @@ class Insight {
           : null,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'steps': steps,
+        'title': title,
+        'insight': insight,
+        'next_steps': nextSteps,
+        'source_functions': sourceFunctions.map((e) => e.toJson()).toList(),
+        'last_glucose_data_point_timestamp_for_insight':
+            lastGlucoseDataPointTimestampForInsight,
+        'rating': rating,
+        'comment': comment,
+        'launch_ready': launchReady,
+        'flag': flag?.toJson(),
+      };
 }
 
 class SourceFunction {
@@ -74,6 +92,11 @@ class SourceFunction {
         sourceData:
             json.decode(jsonData['source_data']) as Map<String, dynamic>);
   }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'source_data': json.encode(sourceData),
+      };
 }
 
 class AllUsersInsights {
@@ -90,6 +113,9 @@ class AllUsersInsights {
 
     return AllUsersInsights(userInsights: userInsights);
   }
+
+  Map<String, dynamic> toJson() =>
+      userInsights.map((k, v) => MapEntry(k, v.toJson()));
 }
 
 class Flag {
@@ -97,4 +123,9 @@ class Flag {
   final String? comment; // Optional comment for "Other" reason
 
   Flag({required this.reason, this.comment});
+
+  Map<String, dynamic> toJson() => {
+        'reason': reason,
+        'comment': comment,
+      };
 }
