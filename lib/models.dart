@@ -129,3 +129,45 @@ class Flag {
         'comment': comment,
       };
 }
+
+class ExportConfig {
+  bool insights = true;
+  bool userInsight = true;
+  bool title = true;
+  bool insightText = true; // Renamed from 'insight' for clarity
+  bool nextSteps = true;
+  bool sourceFunctions = true;
+  bool sourceName = true;
+  bool sourceData = true;
+
+  // Methods to handle the logic of selecting and deselecting parent and child nodes
+  void toggleInsights(bool value) {
+    insights = value;
+    if (value) {
+      userInsight = true;
+      toggleUserInsight(true);
+    }
+  }
+
+  void toggleUserInsight(bool value) {
+    userInsight = value;
+    if (value) {
+      title = true;
+      insightText = true;
+      nextSteps = true;
+      sourceFunctions = true;
+      toggleSourceFunctions(true);
+    }
+  }
+
+  void toggleSourceFunctions(bool value) {
+    sourceFunctions = value;
+    if (value) {
+      sourceName = true;
+      sourceData = true;
+    } else {
+      sourceName = false;
+      sourceData = false;
+    }
+  }
+}
