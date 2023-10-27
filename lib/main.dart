@@ -860,6 +860,15 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
       content: SingleChildScrollView(
         child: ListBody(
           children: [
+            SwitchListTile(
+              title: Text("Export Launch Ready Insights Only"),
+              value: config.exportLaunchReadyOnly,
+              onChanged: (value) {
+                setState(() {
+                  config.exportLaunchReadyOnly = value;
+                });
+              },
+            ),
             buildChildTile("Insights", config.insights, 'insights'),
             buildChildTile(
                 "User Insight", config.userInsight, 'userInsight', 1),
@@ -893,19 +902,6 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
 
   Widget buildChildTile(String title, CheckState checkState, String itemName,
       [int indentLevel = 0]) {
-    return ListTile(
-      contentPadding: EdgeInsets.only(left: 20.0 * indentLevel),
-      leading: _buildCheckbox(checkState),
-      title: Text(title),
-      onTap: () {
-        setState(() {
-          config.toggleItem(_toggleCheckState(checkState), itemName);
-        });
-      },
-    );
-  }
-
-  Widget _buildCheckbox(CheckState checkState) {
     bool? isChecked;
     if (checkState == CheckState.checked) {
       isChecked = true;
@@ -915,10 +911,17 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
       isChecked = false;
     }
 
-    return Checkbox(
+    return CheckboxListTile(
+      contentPadding: EdgeInsets.only(left: 20.0 * indentLevel),
       value: isChecked,
-      onChanged: (val) {},
-      tristate: true, // Enables the checkbox to have three states
+      onChanged: (val) {
+        setState(() {
+          config.toggleItem(_toggleCheckState(checkState), itemName);
+        });
+      },
+      title: Text(title),
+      controlAffinity: ListTileControlAffinity.leading,
+      tristate: true,
     );
   }
 

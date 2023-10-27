@@ -142,11 +142,27 @@ class AllUsersInsights {
   Map<String, dynamic> toJson([ExportConfig? config]) {
     Map<String, dynamic> result = {};
 
+    // Check if launchReady export filter is on
+    bool launchReadyFilter = config?.exportLaunchReadyOnly == true;
+
+    Map<String, UserInsight> filteredUserInsights = {};
+
+    userInsights.forEach((userId, userInsight) {
+      // If launchReady export filter is on, remove users with no launch-ready insights
+      if (launchReadyFilter) {
+        if (userInsight.insights.any((insight) => insight.launchReady)) {
+          filteredUserInsights[userId] = userInsight;
+        }
+      } else {
+        filteredUserInsights[userId] = userInsight;
+      }
+    });
+
     if (config == null ||
         config.insights == CheckState.checked ||
         config.insights == CheckState.halfChecked) {
       result["insights"] =
-          userInsights.map((k, v) => MapEntry(k, v.toJson(config)));
+          filteredUserInsights.map((k, v) => MapEntry(k, v.toJson(config)));
     }
 
     return result;
@@ -180,6 +196,8 @@ class ExportConfig {
   CheckState sourceFunctions = CheckState.unchecked;
   CheckState sourceName = CheckState.unchecked;
   CheckState sourceData = CheckState.unchecked;
+
+  bool exportLaunchReadyOnly = false;
 
   void toggleItem(CheckState value, String itemName) {
     switch (itemName) {
