@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models.dart';
 import 'package:insights_app/user_insights_page.dart';
