@@ -173,17 +173,17 @@ class InsightWidget extends StatelessWidget {
                   ),
                   Card(
                     child: ListTile(
-                      title: Text(insight.title),
+                      title: SelectableText(insight.title),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(insight.insight),
+                          SelectableText(insight.insight),
                           const SizedBox(height: 8.0),
                           const Text(
                             "Next Steps:",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          Text(insight.nextSteps),
+                          SelectableText(insight.nextSteps),
                         ],
                       ),
                     ),
@@ -331,12 +331,10 @@ class InsightWidget extends StatelessWidget {
                           .read<InsightCubit>()
                           .setComment(userId, insight, value);
                     },
-                    maxLines: 10,
                     decoration: const InputDecoration(
                       labelText: 'Comments',
                       alignLabelWithHint: true,
                       hintText: 'Optional',
-                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(
@@ -501,10 +499,10 @@ class UserSelectionPage extends StatelessWidget {
               ...state.userInsights.keys.map(
                 (userId) {
                   return ListTile(
-                    title: Center(
-                        child: Text(
+                    titleAlignment: ListTileTitleAlignment.center,
+                    title: Text(
                       userId,
-                    )),
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,
