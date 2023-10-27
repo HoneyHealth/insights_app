@@ -945,6 +945,8 @@ class ExportedJsonPage extends StatefulWidget {
 
 class _ExportedJsonPageState extends State<ExportedJsonPage> {
   bool _copied = false;
+  Timer? _timer;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -976,16 +978,21 @@ class _ExportedJsonPageState extends State<ExportedJsonPage> {
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Clipboard.setData(ClipboardData(text: widget.jsonString));
           setState(() {
             _copied = true;
           });
-          Timer(Duration(seconds: 5), () {
-            setState(() {
-              _copied = false;
-            });
+          _timer = Timer(Duration(seconds: 5), () {
+            // Step 3: Assign the timer to the _timer instance
+            if (mounted) {
+              // Ensure the widget is still in the tree
+              setState(() {
+                _copied = false;
+              });
+            }
           });
         },
         label: AnimatedSwitcher(
@@ -1014,5 +1021,11 @@ class _ExportedJsonPageState extends State<ExportedJsonPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Step 2: Cancel the timer when disposing the widget
+    super.dispose();
   }
 }
