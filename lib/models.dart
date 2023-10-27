@@ -16,10 +16,18 @@ class UserInsight {
   Map<String, dynamic> toJson([ExportConfig? config]) {
     Map<String, dynamic> result = {};
 
+    List<Insight> filteredInsights;
+    if (config?.exportLaunchReadyOnly == true) {
+      filteredInsights = insights.where((i) => i.launchReady).toList();
+    } else {
+      filteredInsights = insights;
+    }
+
     if (config == null ||
         config.userInsight == CheckState.checked ||
         config.userInsight == CheckState.halfChecked) {
-      result['insights'] = insights.map((e) => e.toJson(config)).toList();
+      result['insights'] =
+          filteredInsights.map((e) => e.toJson(config)).toList();
     }
 
     return result;
