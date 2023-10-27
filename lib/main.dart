@@ -10,6 +10,8 @@ import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+import 'color_schemes.g.dart';
+
 void main() {
   final insightCubit = InsightCubit(AllUsersInsights(userInsights: {}));
 
@@ -28,10 +30,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Insights Review Application',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       home: const JsonInputPage(),
     );
   }
@@ -489,6 +489,7 @@ class UserSelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    [] + [];
     return Scaffold(
       appBar: AppBar(
         title: const Text("Select a User"),
@@ -496,19 +497,30 @@ class UserSelectionPage extends StatelessWidget {
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
           return ListView(
-            children: state.userInsights.keys.map((userId) {
-              return ListTile(
-                title: Text(userId),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserInsightsPage(userId: userId),
-                    ),
+            children: [
+              ...state.userInsights.keys.map(
+                (userId) {
+                  return ListTile(
+                    title: Center(
+                        child: Text(
+                      userId,
+                    )),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              UserInsightsPage(userId: userId),
+                        ),
+                      );
+                    },
                   );
                 },
-              );
-            }).toList(),
+              ).toList(),
+              const SizedBox(
+                height: 132,
+              ),
+            ],
           );
         },
       ),
@@ -597,13 +609,37 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
                                   child: const Text("Previous"),
                                 )
                               else
-                                const SizedBox.shrink(),
-                              Text(getUserProgressText(),
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                              Text(getInsightProgressText(),
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(
+                                  width: 108,
+                                ),
+                              getValueForScreenType(
+                                context: context,
+                                mobile: Column(
+                                  children: [
+                                    Text(
+                                      getUserProgressText(),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      getInsightProgressText(),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                tablet: Row(children: [
+                                  Text(getUserProgressText(),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  SizedBox(
+                                    width: 16,
+                                  ),
+                                  Text(getInsightProgressText(),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                ]),
+                              ),
                               ElevatedButton(
                                 onPressed: () {
                                   if (currentInsightIndex <
