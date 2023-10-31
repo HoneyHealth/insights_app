@@ -352,7 +352,7 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
       content: SingleChildScrollView(
         child: ListBody(
           children: [
-            SwitchListTile(
+            SwitchListTile.adaptive(
               title: Text("Export Launch Ready Insights Only"),
               value: config.exportLaunchReadyOnly,
               onChanged: (value) {
@@ -409,7 +409,7 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
       isChecked = false;
     }
 
-    return CheckboxListTile(
+    return CheckboxListTile.adaptive(
       contentPadding: EdgeInsets.only(left: 20.0 * indentLevel),
       value: isChecked,
       onChanged: (val) {
