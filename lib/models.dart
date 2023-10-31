@@ -101,6 +101,20 @@ class Insight {
           sourceFunctions.map((e) => e.toJson(config)).toList();
     }
 
+    if (config == null ||
+        config.reviewMetadata == CheckState.checked ||
+        config.reviewMetadata == CheckState.halfChecked) {
+      if (config == null || config.rating == CheckState.checked && rating != null) {
+        result['rating'] = rating;
+      }
+      if (config == null || config.comment == CheckState.checked && comment != null) {
+        result['comment'] = comment;
+      }
+      if (config == null || config.flag == CheckState.checked && flag != null) {
+        result['flag'] = flag!.toJson();
+      }
+    }
+
     return result;
   }
 }
@@ -205,6 +219,11 @@ class ExportConfig {
   CheckState sourceName = CheckState.unchecked;
   CheckState sourceData = CheckState.unchecked;
 
+  CheckState reviewMetadata = CheckState.unchecked;
+  CheckState rating = CheckState.unchecked;
+  CheckState comment = CheckState.unchecked;
+  CheckState flag = CheckState.unchecked;
+
   bool exportLaunchReadyOnly = false;
 
   void toggleItem(CheckState value, String itemName) {
@@ -215,30 +234,35 @@ class ExportConfig {
         break;
       case 'userInsight':
         userInsight = value;
-        _updateChildStates(
-            value, ['title', 'insightText', 'nextSteps', 'sourceFunctions']);
+        _updateChildStates(value, [
+          'title',
+          'insightText',
+          'nextSteps',
+          'sourceFunctions',
+          'reviewMetadata'
+        ]);
         _updateParentState('insights', [userInsight]);
         break;
       case 'title':
         title = value;
         _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+            'userInsight', [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'insightText':
         insightText = value;
-        _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'nextSteps':
         nextSteps = value;
-        _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'sourceFunctions':
         sourceFunctions = value;
         _updateChildStates(value, ['sourceName', 'sourceData']);
-        _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'sourceName':
         sourceName = value;
@@ -247,6 +271,24 @@ class ExportConfig {
       case 'sourceData':
         sourceData = value;
         _updateParentState('sourceFunctions', [sourceName, sourceData]);
+        break;
+      case 'reviewMetadata':
+        reviewMetadata = value;
+        _updateChildStates(value, ['rating', 'comment', 'flag']);
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
+        break;
+      case 'rating':
+        rating = value;
+        _updateParentState('reviewMetadata', [rating, comment, flag]);
+        break;
+      case 'comment':
+        comment = value;
+        _updateParentState('reviewMetadata', [rating, comment, flag]);
+        break;
+      case 'flag':
+        flag = value;
+        _updateParentState('reviewMetadata', [rating, comment, flag]);
         break;
     }
   }
@@ -283,7 +325,14 @@ class ExportConfig {
           sourceFunctions = newParentState;
         }
         _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions]);
+            'userInsight', [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
+        break;
+      case 'reviewMetadata':
+        if (reviewMetadata != newParentState) {
+          reviewMetadata = newParentState;
+        }
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'insights':
         if (insights != newParentState) {

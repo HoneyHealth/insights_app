@@ -5,11 +5,32 @@ import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class InsightMobileWidget extends StatelessWidget {
+class InsightMobileWidget extends StatefulWidget {
   final String userId;
   final Insight insight;
 
   const InsightMobileWidget(this.userId, this.insight, {super.key});
+
+  @override
+  State<InsightMobileWidget> createState() => _InsightMobileWidgetState();
+}
+
+class _InsightMobileWidgetState extends State<InsightMobileWidget> {
+  final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _commentController.text = widget.insight.comment ?? "";
+  }
+
+  @override
+  void didUpdateWidget(InsightMobileWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.insight != widget.insight) {
+      _commentController.text = widget.insight.comment ?? "";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,32 +58,31 @@ class InsightMobileWidget extends StatelessWidget {
                 children: [
                   SwitchListTile(
                     title: const Text('Launch Ready'),
-                    value: insight.launchReady,
-                    onChanged: insight.flag == null
+                    value: widget.insight.launchReady,
+                    onChanged: widget.insight.flag == null
                         ? (bool value) {
-                            context
-                                .read<InsightCubit>()
-                                .toggleLaunchReady(userId, insight);
+                            context.read<InsightCubit>().toggleLaunchReady(
+                                widget.userId, widget.insight);
                           }
                         : null, // Disable if flagged
-                    subtitle: insight.flag != null
+                    subtitle: widget.insight.flag != null
                         ? const Text(
                             'This insight is flagged. Resolve the flag before launching.')
                         : const Text(''),
                   ),
                   Card(
                     child: ListTile(
-                      title: SelectableText(insight.title),
+                      title: SelectableText(widget.insight.title),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SelectableText(insight.insight),
+                          SelectableText(widget.insight.insight),
                           const SizedBox(height: 8.0),
                           const Text(
                             "Next Steps:",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SelectableText(insight.nextSteps),
+                          SelectableText(widget.insight.nextSteps),
                         ],
                       ),
                     ),
@@ -75,7 +95,7 @@ class InsightMobileWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       RatingBar.builder(
-                        initialRating: insight.rating ?? 0,
+                        initialRating: widget.insight.rating ?? 0,
                         minRating: 0.5,
                         direction: Axis.horizontal,
                         allowHalfRating: true,
@@ -89,21 +109,21 @@ class InsightMobileWidget extends StatelessWidget {
                         onRatingUpdate: (rating) {
                           context
                               .read<InsightCubit>()
-                              .setRating(userId, insight, rating);
+                              .setRating(widget.userId, widget.insight, rating);
                         },
                       ),
                       SizedBox(
                         height: 58,
                         child: Row(
                           children: [
-                            if (insight.flag != null)
+                            if (widget.insight.flag != null)
                               IntrinsicWidth(
                                 child: ListTile(
                                   title: Text(
-                                      "Flagged for: ${insight.flag!.reason}"),
-                                  subtitle: insight.flag!.comment != null
+                                      "Flagged for: ${widget.insight.flag!.reason}"),
+                                  subtitle: widget.insight.flag!.comment != null
                                       ? Text(
-                                          "Comment: ${insight.flag!.comment}")
+                                          "Comment: ${widget.insight.flag!.comment}")
                                       : null,
                                 ),
                               ),
@@ -114,14 +134,18 @@ class InsightMobileWidget extends StatelessWidget {
                                   child: const Text("Inaccurate"),
                                   onPressed: () {
                                     context.read<InsightCubit>().flagInsight(
-                                        userId, insight, "Inaccurate");
+                                        widget.userId,
+                                        widget.insight,
+                                        "Inaccurate");
                                   },
                                 ),
                                 MenuItemButton(
                                   child: const Text("Irrelevant"),
                                   onPressed: () {
                                     context.read<InsightCubit>().flagInsight(
-                                        userId, insight, "Irrelevant");
+                                        widget.userId,
+                                        widget.insight,
+                                        "Irrelevant");
                                   },
                                 ),
                                 MenuItemButton(
@@ -149,8 +173,8 @@ class InsightMobileWidget extends StatelessWidget {
                                                 context
                                                     .read<InsightCubit>()
                                                     .flagInsight(
-                                                        userId,
-                                                        insight,
+                                                        widget.userId,
+                                                        widget.insight,
                                                         'Other',
                                                         commentController.text);
                                                 Navigator.pop(
@@ -168,7 +192,7 @@ class InsightMobileWidget extends StatelessWidget {
                               builder: (context, controller, child) =>
                                   AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
-                                child: insight.flag == null
+                                child: widget.insight.flag == null
                                     ? IconButton(
                                         key: const ValueKey('flag_outlined'),
                                         icon: const Icon(Icons.flag_outlined),
@@ -186,7 +210,8 @@ class InsightMobileWidget extends StatelessWidget {
                                         onPressed: () {
                                           context
                                               .read<InsightCubit>()
-                                              .removeFlag(userId, insight);
+                                              .removeFlag(widget.userId,
+                                                  widget.insight);
                                         },
                                         tooltip: "Remove insight flag",
                                         icon: const Icon(
@@ -205,10 +230,11 @@ class InsightMobileWidget extends StatelessWidget {
                     height: 24,
                   ),
                   TextFormField(
+                    controller: _commentController,
                     onChanged: (value) {
                       context
                           .read<InsightCubit>()
-                          .setComment(userId, insight, value);
+                          .setComment(widget.userId, widget.insight, value);
                     },
                     decoration: const InputDecoration(
                       labelText: 'Comments',
@@ -226,7 +252,7 @@ class InsightMobileWidget extends StatelessWidget {
                 ],
               ),
             ),
-            for (var sourceFunction in insight.sourceFunctions) ...[
+            for (var sourceFunction in widget.insight.sourceFunctions) ...[
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
