@@ -10,7 +10,24 @@ class InsightDesktopWidget extends StatelessWidget {
   final String userId;
   final Insight insight;
 
-  const InsightDesktopWidget(this.userId, this.insight, {super.key});
+  final TextEditingController _commentController;
+
+  final List<DataColumn> Function(Map<String, dynamic> sourceData)
+      _generateColumns;
+  final List<DataRow> Function(Map<String, dynamic> sourceData) _generateRows;
+
+  const InsightDesktopWidget({
+    super.key,
+    required this.userId,
+    required this.insight,
+    required TextEditingController commentController,
+    required List<DataColumn> Function(Map<String, dynamic> sourceData)
+        generateColumns,
+    required List<DataRow> Function(Map<String, dynamic> sourceData)
+        generateRows,
+  })  : _commentController = commentController,
+        _generateColumns = generateColumns,
+        _generateRows = generateRows;
 
   @override
   Widget build(BuildContext context) {
@@ -224,6 +241,7 @@ class InsightDesktopWidget extends StatelessWidget {
                           height: 24,
                         ),
                         TextFormField(
+                          controller: _commentController,
                           onChanged: (value) {
                             context
                                 .read<InsightCubit>()
@@ -317,100 +335,5 @@ class InsightDesktopWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _showFlagOptions(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Flag Reason"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text("Inaccurate"),
-              onTap: () {
-                context
-                    .read<InsightCubit>()
-                    .flagInsight(userId, insight, "Inaccurate");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text("Irrelevant"),
-              onTap: () {
-                context
-                    .read<InsightCubit>()
-                    .flagInsight(userId, insight, "Irrelevant");
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text("Other"),
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    final commentController = TextEditingController();
-                    return AlertDialog(
-                      title: const Text("Comment"),
-                      content: TextFormField(
-                        controller: commentController,
-                        maxLines: 5,
-                        decoration: const InputDecoration(
-                          hintText: "Enter your comment here",
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      actions: [
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<InsightCubit>().flagInsight(userId,
-                                insight, 'Other', commentController.text);
-                            Navigator.pop(context); // close comment dialog
-                            Navigator.pop(context); // close flag options dialog
-                          },
-                          child: const Text("Submit"),
-                        )
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<DataColumn> _generateColumns(Map<String, dynamic> sourceData) {
-    var columns = [const DataColumn(label: Text(''))];
-    columns.addAll(sourceData.keys.map((key) => DataColumn(label: Text(key))));
-    return columns;
-  }
-
-  List<DataRow> _generateRows(Map<String, dynamic> sourceData) {
-    if (sourceData.isEmpty) return [];
-
-    var firstEntry = sourceData.entries.first.value as Map<String, dynamic>;
-    return firstEntry.keys.map((originalColumn) {
-      var cells = [
-        DataCell(
-          Text(
-            originalColumn,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        )
-      ]; // Bolded the text
-      cells.addAll(sourceData.entries.map((entry) {
-        var value = (entry.value as Map<String, dynamic>)[originalColumn];
-        return DataCell(Text(value.toString()));
-      }).toList());
-
-      return DataRow(cells: cells);
-    }).toList();
   }
 }

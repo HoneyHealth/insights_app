@@ -5,32 +5,27 @@ import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class InsightMobileWidget extends StatefulWidget {
+class InsightMobileWidget extends StatelessWidget {
   final String userId;
   final Insight insight;
+  final TextEditingController _commentController;
 
-  const InsightMobileWidget(this.userId, this.insight, {super.key});
+  final List<DataColumn> Function(Map<String, dynamic> sourceData)
+      _generateColumns;
+  final List<DataRow> Function(Map<String, dynamic> sourceData) _generateRows;
 
-  @override
-  State<InsightMobileWidget> createState() => _InsightMobileWidgetState();
-}
-
-class _InsightMobileWidgetState extends State<InsightMobileWidget> {
-  final TextEditingController _commentController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _commentController.text = widget.insight.comment ?? "";
-  }
-
-  @override
-  void didUpdateWidget(InsightMobileWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.insight != widget.insight) {
-      _commentController.text = widget.insight.comment ?? "";
-    }
-  }
+  const InsightMobileWidget({
+    super.key,
+    required this.userId,
+    required this.insight,
+    required TextEditingController commentController,
+    required List<DataColumn> Function(Map<String, dynamic> sourceData)
+        generateColumns,
+    required List<DataRow> Function(Map<String, dynamic> sourceData)
+        generateRows,
+  })  : _commentController = commentController,
+        _generateColumns = generateColumns,
+        _generateRows = generateRows;
 
   @override
   Widget build(BuildContext context) {
@@ -58,31 +53,32 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                 children: [
                   SwitchListTile(
                     title: const Text('Launch Ready'),
-                    value: widget.insight.launchReady,
-                    onChanged: widget.insight.flag == null
+                    value: insight.launchReady,
+                    onChanged: insight.flag == null
                         ? (bool value) {
-                            context.read<InsightCubit>().toggleLaunchReady(
-                                widget.userId, widget.insight);
+                            context
+                                .read<InsightCubit>()
+                                .toggleLaunchReady(userId, insight);
                           }
                         : null, // Disable if flagged
-                    subtitle: widget.insight.flag != null
+                    subtitle: insight.flag != null
                         ? const Text(
                             'This insight is flagged. Resolve the flag before launching.')
                         : const Text(''),
                   ),
                   Card(
                     child: ListTile(
-                      title: SelectableText(widget.insight.title),
+                      title: SelectableText(insight.title),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SelectableText(widget.insight.insight),
+                          SelectableText(insight.insight),
                           const SizedBox(height: 8.0),
                           const Text(
                             "Next Steps:",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SelectableText(widget.insight.nextSteps),
+                          SelectableText(insight.nextSteps),
                         ],
                       ),
                     ),
@@ -95,7 +91,7 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       RatingBar.builder(
-                        initialRating: widget.insight.rating ?? 0,
+                        initialRating: insight.rating ?? 0,
                         minRating: 0.5,
                         direction: Axis.horizontal,
                         allowHalfRating: true,
@@ -109,21 +105,21 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                         onRatingUpdate: (rating) {
                           context
                               .read<InsightCubit>()
-                              .setRating(widget.userId, widget.insight, rating);
+                              .setRating(userId, insight, rating);
                         },
                       ),
                       SizedBox(
                         height: 58,
                         child: Row(
                           children: [
-                            if (widget.insight.flag != null)
+                            if (insight.flag != null)
                               IntrinsicWidth(
                                 child: ListTile(
                                   title: Text(
-                                      "Flagged for: ${widget.insight.flag!.reason}"),
-                                  subtitle: widget.insight.flag!.comment != null
+                                      "Flagged for: ${insight.flag!.reason}"),
+                                  subtitle: insight.flag!.comment != null
                                       ? Text(
-                                          "Comment: ${widget.insight.flag!.comment}")
+                                          "Comment: ${insight.flag!.comment}")
                                       : null,
                                 ),
                               ),
@@ -134,18 +130,14 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                                   child: const Text("Inaccurate"),
                                   onPressed: () {
                                     context.read<InsightCubit>().flagInsight(
-                                        widget.userId,
-                                        widget.insight,
-                                        "Inaccurate");
+                                        userId, insight, "Inaccurate");
                                   },
                                 ),
                                 MenuItemButton(
                                   child: const Text("Irrelevant"),
                                   onPressed: () {
                                     context.read<InsightCubit>().flagInsight(
-                                        widget.userId,
-                                        widget.insight,
-                                        "Irrelevant");
+                                        userId, insight, "Irrelevant");
                                   },
                                 ),
                                 MenuItemButton(
@@ -173,8 +165,8 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                                                 context
                                                     .read<InsightCubit>()
                                                     .flagInsight(
-                                                        widget.userId,
-                                                        widget.insight,
+                                                        userId,
+                                                        insight,
                                                         'Other',
                                                         commentController.text);
                                                 Navigator.pop(
@@ -192,7 +184,7 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                               builder: (context, controller, child) =>
                                   AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
-                                child: widget.insight.flag == null
+                                child: insight.flag == null
                                     ? IconButton(
                                         key: const ValueKey('flag_outlined'),
                                         icon: const Icon(Icons.flag_outlined),
@@ -210,8 +202,7 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                                         onPressed: () {
                                           context
                                               .read<InsightCubit>()
-                                              .removeFlag(widget.userId,
-                                                  widget.insight);
+                                              .removeFlag(userId, insight);
                                         },
                                         tooltip: "Remove insight flag",
                                         icon: const Icon(
@@ -234,7 +225,7 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                     onChanged: (value) {
                       context
                           .read<InsightCubit>()
-                          .setComment(widget.userId, widget.insight, value);
+                          .setComment(userId, insight, value);
                     },
                     decoration: const InputDecoration(
                       labelText: 'Comments',
@@ -252,7 +243,7 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
                 ],
               ),
             ),
-            for (var sourceFunction in widget.insight.sourceFunctions) ...[
+            for (var sourceFunction in insight.sourceFunctions) ...[
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -289,35 +280,5 @@ class _InsightMobileWidgetState extends State<InsightMobileWidget> {
         ),
       ),
     );
-  }
-
-  List<DataColumn> _generateColumns(Map<String, dynamic> sourceData) {
-    var columns = [const DataColumn(label: Text(''))];
-    columns.addAll(sourceData.keys.map((key) => DataColumn(label: Text(key))));
-    return columns;
-  }
-
-  List<DataRow> _generateRows(Map<String, dynamic> sourceData) {
-    if (sourceData.isEmpty) return [];
-
-    var firstEntry = sourceData.entries.first.value as Map<String, dynamic>;
-    return firstEntry.keys.map((originalColumn) {
-      var cells = [
-        DataCell(
-          Text(
-            originalColumn,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        )
-      ]; // Bolded the text
-      cells.addAll(sourceData.entries.map((entry) {
-        var value = (entry.value as Map<String, dynamic>)[originalColumn];
-        return DataCell(Text(value.toString()));
-      }).toList());
-
-      return DataRow(cells: cells);
-    }).toList();
   }
 }
