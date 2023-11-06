@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:insights_app/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-import 'insight_widget.mobile.dart';
 import 'insight_widget.desktop.dart';
+import 'insight_widget.mobile.dart';
 
 class InsightWidget extends StatefulWidget {
   final String userId;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:insights_app/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -26,7 +27,7 @@ class SourceFunctionsList extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 24,
+            vertical: 16,
           ),
           constraints: BoxConstraints(
             maxWidth: getValueForScreenType(
@@ -63,7 +64,7 @@ class SourceFunctionsList extends StatelessWidget {
                 desktop: 1200,
               ),
             ),
-            child: ListTile(
+            child: PlatformListTile(
               title: Text(sourceFunction.name),
               // Add code here for Step 2
             ),

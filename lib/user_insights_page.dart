@@ -2,8 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:insights_app/widgets/insight/insight_widget.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:insights_app/main.dart';
+import 'package:insights_app/widgets/insight/insight_widget.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import 'insights_cubit.dart';
@@ -41,10 +42,11 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return PlatformScaffold(
+      appBar: PlatformAppBar(
         title: Text("Insights for ${widget.userId}"),
       ),
+      iosContentPadding: true,
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
           var insights = state.userInsights[widget.userId]?.insights ?? [];
@@ -57,8 +59,107 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
                 child:
                     InsightWidget(widget.userId, insights[currentInsightIndex]),
               ),
-              BottomAppBar(
-                child: Row(
+              PlatformWidget(
+                material: (_, __) => BottomAppBar(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: min(
+                            MediaQuery.of(context).size.width - 32,
+                            getValueForScreenType(
+                              context: context,
+                              mobile: 600 - 32,
+                              tablet: 900 - 32,
+                              desktop: 1200 - 32,
+                            ),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                PlatformElevatedButton(
+                                  onPressed: currentInsightIndex > 0
+                                      ? () {
+                                          setState(() {
+                                            currentInsightIndex--;
+                                          });
+                                        }
+                                      : null,
+                                  child: const Text("Previous"),
+                                ),
+                                getValueForScreenType(
+                                  context: context,
+                                  mobile: Column(
+                                    children: [
+                                      Text(
+                                        getUserProgressText(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        getInsightProgressText(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  tablet: Row(children: [
+                                    Text(
+                                      getUserProgressText(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 16,
+                                    ),
+                                    Text(
+                                      getInsightProgressText(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ]),
+                                ),
+                                PlatformElevatedButton(
+                                  onPressed: () {
+                                    if (currentInsightIndex <
+                                        insights.length - 1) {
+                                      setState(() {
+                                        currentInsightIndex++;
+                                      });
+                                    } else {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        platformPageRoute(
+                                          context: context,
+                                          builder: (context) =>
+                                              InsightSummaryPage(
+                                                  userId: widget.userId),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Text(
+                                      currentInsightIndex < insights.length - 1
+                                          ? "Next"
+                                          : "Summary"),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                cupertino: (_, __) => Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -80,48 +181,51 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if (currentInsightIndex > 0)
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      currentInsightIndex--;
-                                    });
-                                  },
-                                  child: const Text("Previous"),
-                                )
-                              else
-                                const SizedBox(
-                                  width: 108,
-                                ),
+                              PlatformTextButton(
+                                onPressed: currentInsightIndex > 0
+                                    ? () {
+                                        setState(() {
+                                          currentInsightIndex--;
+                                        });
+                                      }
+                                    : null,
+                                child: const Text("Previous"),
+                              ),
                               getValueForScreenType(
                                 context: context,
                                 mobile: Column(
                                   children: [
                                     Text(
                                       getUserProgressText(),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       getInsightProgressText(),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
                                 tablet: Row(children: [
-                                  Text(getUserProgressText(),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(
+                                  Text(
+                                    getUserProgressText(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(
                                     width: 16,
                                   ),
-                                  Text(getInsightProgressText(),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
+                                  Text(
+                                    getInsightProgressText(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ]),
                               ),
-                              ElevatedButton(
+                              PlatformTextButton(
                                 onPressed: () {
                                   if (currentInsightIndex <
                                       insights.length - 1) {
@@ -131,7 +235,8 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
                                   } else {
                                     Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(
+                                      platformPageRoute(
+                                        context: context,
                                         builder: (context) =>
                                             InsightSummaryPage(
                                                 userId: widget.userId),
@@ -151,7 +256,7 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
                     ),
                   ],
                 ),
-              ),
+              )
             ],
           );
         },

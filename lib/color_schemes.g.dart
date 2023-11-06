@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 const lightColorScheme = ColorScheme(
@@ -66,4 +67,24 @@ const darkColorScheme = ColorScheme(
   onSurface: Color(0xFFC4C7C5),
   surfaceVariant: Color(0xFF3F4947),
   onSurfaceVariant: Color(0xFFBEC9C6),
+);
+
+CupertinoThemeData lightCupertinoTheme = CupertinoThemeData(
+  brightness: Brightness.light,
+  primaryColor: lightColorScheme.primary,
+  barBackgroundColor: lightColorScheme.background,
+  scaffoldBackgroundColor: lightColorScheme.surface,
+  textTheme: CupertinoTextThemeData(
+    primaryColor: lightColorScheme.onPrimary,
+  ),
+);
+
+CupertinoThemeData darkCupertinoTheme = CupertinoThemeData(
+  brightness: Brightness.dark,
+  primaryColor: darkColorScheme.primary,
+  barBackgroundColor: darkColorScheme.background,
+  scaffoldBackgroundColor: darkColorScheme.surface,
+  textTheme: CupertinoTextThemeData(
+    primaryColor: darkColorScheme.onPrimary,
+  ),
 );
