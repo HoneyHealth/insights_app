@@ -66,9 +66,10 @@ class Insight {
       title: json['title'],
       insight: json['insight'],
       nextSteps: json['next_steps'],
-      sourceFunctions: (json['source_functions'] as List)
-          .map((sf) => SourceFunction.fromJson(sf as Map<String, dynamic>))
-          .toList(),
+      sourceFunctions: (json['source_functions'] as List?)
+              ?.map((sf) => SourceFunction.fromJson(sf as Map<String, dynamic>))
+              .toList() ??
+          [],
       lastGlucoseDataPointTimestampForInsight:
           json['last_glucose_data_point_timestamp_for_insight'],
       rating: json['rating'],
@@ -104,10 +105,12 @@ class Insight {
     if (config == null ||
         config.reviewMetadata == CheckState.checked ||
         config.reviewMetadata == CheckState.halfChecked) {
-      if (config == null || config.rating == CheckState.checked && rating != null) {
+      if (config == null ||
+          config.rating == CheckState.checked && rating != null) {
         result['rating'] = rating;
       }
-      if (config == null || config.comment == CheckState.checked && comment != null) {
+      if (config == null ||
+          config.comment == CheckState.checked && comment != null) {
         result['comment'] = comment;
       }
       if (config == null || config.flag == CheckState.checked && flag != null) {
@@ -245,8 +248,8 @@ class ExportConfig {
         break;
       case 'title':
         title = value;
-        _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'insightText':
         insightText = value;
@@ -324,8 +327,8 @@ class ExportConfig {
         if (sourceFunctions != newParentState) {
           sourceFunctions = newParentState;
         }
-        _updateParentState(
-            'userInsight', [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
+        _updateParentState('userInsight',
+            [title, insightText, nextSteps, sourceFunctions, reviewMetadata]);
         break;
       case 'reviewMetadata':
         if (reviewMetadata != newParentState) {
