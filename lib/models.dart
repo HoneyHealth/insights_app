@@ -169,9 +169,6 @@ class AllUsersInsights {
     Map<String, UserInsight> userInsights = {};
 
     json.forEach((key, value) {
-      print(key);
-      print(value);
-
       // Check if value is directly an array or nested under 'insights'
       var insightsData;
       if (value is Map<String, dynamic> && value.containsKey('insights')) {
