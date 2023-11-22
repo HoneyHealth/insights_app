@@ -6,10 +6,21 @@ class UserInsight {
   UserInsight({required this.insights});
 
   factory UserInsight.fromJson(Map<String, dynamic> json) {
-    return UserInsight(
-      insights: (json['insights'] as List)
+    List<Insight> insightsList;
+
+    // Check if 'json' contains the 'insights' key
+    if (json.containsKey('insights') && json['insights'] is List) {
+      // If 'insights' key exists and is a list, process it
+      insightsList = (json['insights'] as List)
           .map((i) => Insight.fromJson(i as Map<String, dynamic>))
-          .toList(),
+          .toList();
+    } else {
+      // If 'insights' key does not exist, treat the entire json as insights data
+      insightsList = [Insight.fromJson(json)];
+    }
+
+    return UserInsight(
+      insights: insightsList,
     );
   }
 
@@ -72,8 +83,8 @@ class Insight {
           [],
       lastGlucoseDataPointTimestampForInsight:
           json['last_glucose_data_point_timestamp_for_insight'],
-      rating: json['rating'],
-      comment: json['feedback'],
+      rating: (json['rating'] + 0.0) as double,
+      comment: json['critique'],
       launchReady: json['launch_ready'] ?? false,
       flag: json['flag'] != null
           ? Flag(
@@ -111,7 +122,7 @@ class Insight {
       }
       if (config == null ||
           config.comment == CheckState.checked && comment != null) {
-        result['comment'] = comment;
+        result['critique'] = comment;
       }
       if (config == null || config.flag == CheckState.checked && flag != null) {
         result['flag'] = flag!.toJson();
@@ -158,7 +169,26 @@ class AllUsersInsights {
     Map<String, UserInsight> userInsights = {};
 
     json.forEach((key, value) {
-      userInsights[key] = UserInsight.fromJson(value as Map<String, dynamic>);
+      print(key);
+      print(value);
+
+      // Check if value is directly an array or nested under 'insights'
+      var insightsData;
+      if (value is Map<String, dynamic> && value.containsKey('insights')) {
+        insightsData = value['insights'];
+      } else if (value is List) {
+        insightsData = value;
+      } else {
+        // Handle other unexpected formats or log an error
+      }
+
+      if (insightsData != null) {
+        for (var insightData in insightsData) {
+          // Assuming that 'UserInsight.fromJson' can handle the insight data format
+          userInsights[key] =
+              UserInsight.fromJson(insightData as Map<String, dynamic>);
+        }
+      }
     });
 
     return AllUsersInsights(userInsights: userInsights);

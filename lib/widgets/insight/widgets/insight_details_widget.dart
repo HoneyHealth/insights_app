@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -40,12 +37,12 @@ class InsightDetailsWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PlatformListTile(
-            title: Text('Launch Ready'),
+            title: const Text('Launch Ready'),
             subtitle: insight.flag != null
-                ? Text(
+                ? const Text(
                     'This insight is flagged. Resolve the flag before launching.',
                   )
-                : Text(''),
+                : const Text(''),
             onTap: insight.flag == null
                 ? () {
                     context
@@ -133,6 +130,8 @@ class InsightDetailsWidget extends StatelessWidget {
             cupertino: (_, __) => CupertinoTextFieldData(
               placeholder: 'Comments (Optional)',
               padding: const EdgeInsets.all(12.0),
+              minLines: 1,
+              maxLines: null,
             ),
           ),
         ],
