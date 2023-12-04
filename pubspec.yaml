@@ -39,7 +39,7 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   responsive_builder: ^0.7.0
   desktop_split_pane: ^1.0.3
-  flutter_platform_widgets: ^3.3.5
+  flutter_platform_widgets: ^6.0.2
 
 dev_dependencies:
   flutter_test:
