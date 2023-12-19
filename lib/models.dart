@@ -51,6 +51,8 @@ class Insight {
   bool launchReady; // New property
   Flag? flag; // This will be non-null if the insight is flagged
 
+  final Map<String, dynamic> otherData;
+
   Insight({
     required this.steps,
     required this.title,
@@ -62,11 +64,29 @@ class Insight {
     this.comment,
     this.launchReady = false, // Default value
     this.flag,
+    required this.otherData,
   });
 
   factory Insight.fromJson(Map<String, dynamic> json) {
+    // Extract other keys and values from the JSON
+    Map<String, dynamic> otherData = {};
+    json.forEach((key, value) {
+      if (key != 'steps' &&
+          key != 'title' &&
+          key != 'insight' &&
+          key != 'next_steps' &&
+          key != 'source_functions' &&
+          key != 'last_glucose_data_point_timestamp_for_insight' &&
+          key != 'rating' &&
+          key != 'critique' &&
+          key != 'launch_ready' &&
+          key != 'flag') {
+        otherData[key] = value;
+      }
+    });
+
     return Insight(
-      steps: List<String>.from(json['steps']),
+      steps: json.containsKey('steps') ? List<String>.from(json['steps']) : [],
       title: json['title'],
       insight: json['insight'],
       nextSteps: json['next_steps'],
@@ -83,6 +103,7 @@ class Insight {
           ? Flag(
               reason: json['flag']['reason'], comment: json['flag']['comment'])
           : null,
+      otherData: otherData,
     );
   }
 
@@ -121,6 +142,8 @@ class Insight {
         result['flag'] = flag!.toJson();
       }
     }
+
+    result.addAll(otherData);
 
     return result;
   }
