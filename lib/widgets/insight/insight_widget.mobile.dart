@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:insights_app/models.dart';
+import 'package:insights_app/models/models.dart';
 import 'package:insights_app/widgets/insight/widgets/widgets.dart';
 
 class InsightMobileWidget extends StatelessWidget {

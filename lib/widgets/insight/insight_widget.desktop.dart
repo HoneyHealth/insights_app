@@ -1,6 +1,6 @@
 import 'package:desktop_split_pane/desktop_split_pane.dart';
 import 'package:flutter/material.dart';
-import 'package:insights_app/models.dart';
+import 'package:insights_app/models/models.dart';
 import 'package:insights_app/widgets/insight/widgets/source_functions_list.dart';
 
 import 'widgets/insight_details_widget.dart';

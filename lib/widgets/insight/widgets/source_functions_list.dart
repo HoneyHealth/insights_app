@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:insights_app/models.dart';
+import 'package:insights_app/models/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class SourceFunctionsList extends StatelessWidget {
