@@ -9,7 +9,7 @@ class SourceFunction {
 
   factory SourceFunction.fromJson(Map<String, dynamic> jsonData) {
     return SourceFunction(
-        name: jsonData['name'],
+        name: jsonData['name'] ?? "NOT PROVIDED",
         sourceData: jsonData['sourceData'] == null
             ? null
             : json.decode(jsonData['source_data']) as Map<String, dynamic>);
@@ -18,10 +18,12 @@ class SourceFunction {
   Map<String, dynamic> toJson([ExportConfig? config]) {
     Map<String, dynamic> result = {};
 
-    if (config == null || config.sourceName == CheckState.checked) {
+    if ((config == null || config.sourceName == CheckState.checked) &&
+        name != "NOT PROVIDED") {
       result["name"] = name;
     }
-    if (config == null || config.sourceData == CheckState.checked) {
+    if ((config == null || config.sourceData == CheckState.checked) &&
+        sourceData != null) {
       result['source_data'] = sourceData;
     }
 
