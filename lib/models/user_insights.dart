@@ -1,24 +1,22 @@
 import 'models.dart';
 
-class UserInsight {
+class UserInsights {
   final List<Insight> insights;
 
-  UserInsight({required this.insights});
+  UserInsights({required this.insights});
 
-  factory UserInsight.fromJson(Map<String, dynamic> json) {
+  factory UserInsights.fromJson(List<Map<String, dynamic>> jsonList) {
     List<Insight> insightsList;
 
-    insightsList = (json['insights'] as List)
-        .map((i) => Insight.fromJson(i as Map<String, dynamic>))
-        .toList();
+    insightsList = jsonList.map((i) => Insight.fromJson(i)).toList();
 
-    return UserInsight(
+    return UserInsights(
       insights: insightsList,
     );
   }
 
-  Map<String, dynamic> toJson([ExportConfig? config]) {
-    Map<String, dynamic> result = {};
+  List<Map<String, dynamic>> toJson([ExportConfig? config]) {
+    List<Map<String, dynamic>> result = [];
 
     List<Insight> filteredInsights;
     if (config?.exportLaunchReadyOnly == true) {
@@ -30,8 +28,7 @@ class UserInsight {
     if (config == null ||
         config.userInsight == CheckState.checked ||
         config.userInsight == CheckState.halfChecked) {
-      result['insights'] =
-          filteredInsights.map((e) => e.toJson(config)).toList();
+      result = filteredInsights.map((e) => e.toJson(config)).toList();
     }
 
     return result;

@@ -3,4 +3,4 @@ export 'export_config.dart';
 export 'flag.dart';
 export 'insight.dart';
 export 'source_function.dart';
-export 'user_insight.dart';
+export 'user_insights.dart';

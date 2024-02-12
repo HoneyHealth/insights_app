@@ -3,15 +3,16 @@ import 'models.dart';
 
 class SourceFunction {
   final String name;
-  final Map<String, dynamic> sourceData;
+  final Map<String, dynamic>? sourceData;
 
   SourceFunction({required this.name, required this.sourceData});
 
   factory SourceFunction.fromJson(Map<String, dynamic> jsonData) {
     return SourceFunction(
         name: jsonData['name'],
-        sourceData:
-            json.decode(jsonData['source_data']) as Map<String, dynamic>);
+        sourceData: jsonData['sourceData'] == null
+            ? null
+            : json.decode(jsonData['source_data']) as Map<String, dynamic>);
   }
 
   Map<String, dynamic> toJson([ExportConfig? config]) {

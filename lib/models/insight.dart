@@ -49,15 +49,15 @@ class Insight {
 
     return Insight(
       steps: json.containsKey('steps') ? List<String>.from(json['steps']) : [],
-      title: json['title'],
-      insight: json['insight'],
-      nextSteps: json['next_steps'],
+      title: json['title'] ?? "NOT PROVIDED",
+      insight: json['insight'] ?? "NOT PROVIDED",
+      nextSteps: json['next_steps'] ?? "NOT PROVIDED",
       sourceFunctions: (json['source_functions'] as List?)
               ?.map((sf) => SourceFunction.fromJson(sf as Map<String, dynamic>))
               .toList() ??
           [],
       lastGlucoseDataPointTimestampForInsight:
-          json['last_glucose_data_point_timestamp_for_insight'],
+          json['last_glucose_data_point_timestamp_for_insight'] ?? "unknown",
       rating: json['rating'] != null ? (json['rating'] + 0.0) as double : null,
       comment: json['critique'],
       launchReady: json['launch_ready'] ?? false,
@@ -72,13 +72,16 @@ class Insight {
   Map<String, dynamic> toJson([ExportConfig? config]) {
     Map<String, dynamic> result = {};
 
-    if (config == null || config.title == CheckState.checked) {
+    if ((config == null || config.title == CheckState.checked) &&
+        title != "NOT PROVIDED") {
       result['title'] = title;
     }
-    if (config == null || config.insightText == CheckState.checked) {
+    if ((config == null || config.insightText == CheckState.checked) &&
+        insight != "NOT PROVIDED") {
       result['insight'] = insight;
     }
-    if (config == null || config.nextSteps == CheckState.checked) {
+    if ((config == null || config.nextSteps == CheckState.checked) &&
+        nextSteps != "NOT PROVIDED") {
       result['next_steps'] = nextSteps;
     }
 

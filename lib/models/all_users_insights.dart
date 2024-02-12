@@ -1,18 +1,17 @@
 import 'models.dart';
 
 class AllUsersInsights {
-  final Map<String, UserInsight> userInsights;
+  final Map<String, UserInsights> userInsights;
 
   AllUsersInsights({required this.userInsights});
 
   factory AllUsersInsights.fromJson(Map<String, dynamic> json) {
-    Map<String, UserInsight> userInsights = {};
+    Map<String, UserInsights> userInsights = {};
 
     json.forEach((key, value) {
-      if (value is Map<String, dynamic> && value.containsKey('insights')) {
-        userInsights[key] = UserInsight.fromJson(value);
-      } else if (value is List) {
-        userInsights[key] = UserInsight.fromJson({"insights": value});
+      if (value is List) {
+        userInsights[key] =
+            UserInsights.fromJson(value.cast<Map<String, dynamic>>());
       } else {
         // Handle other unexpected formats or log an error
       }
@@ -27,7 +26,7 @@ class AllUsersInsights {
     // Check if launchReady export filter is on
     bool launchReadyFilter = config?.exportLaunchReadyOnly == true;
 
-    Map<String, UserInsight> filteredUserInsights = {};
+    Map<String, UserInsights> filteredUserInsights = {};
 
     userInsights.forEach((userId, userInsight) {
       // If launchReady export filter is on, remove users with no launch-ready insights
@@ -43,7 +42,7 @@ class AllUsersInsights {
     if (config == null ||
         config.insights == CheckState.checked ||
         config.insights == CheckState.halfChecked) {
-      result["insights"] =
+      result =
           filteredUserInsights.map((k, v) => MapEntry(k, v.toJson(config)));
     }
 
