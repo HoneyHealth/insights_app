@@ -73,10 +73,16 @@ class SourceFunctionsList extends StatelessWidget {
             scrollDirection: Axis.vertical,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: _generateColumns(sourceFunction.sourceData),
-                rows: _generateRows(sourceFunction.sourceData),
-              ),
+              child: sourceFunction.sourceData == null
+                  ? const Center(
+                      child: Text(
+                        "No source data provided",
+                      ),
+                    )
+                  : DataTable(
+                      columns: _generateColumns(sourceFunction.sourceData!),
+                      rows: _generateRows(sourceFunction.sourceData!),
+                    ),
             ),
           )
         ],
