@@ -13,7 +13,7 @@ class Insight {
   bool launchReady; // New property
   Flag? flag; // This will be non-null if the insight is flagged
 
-  final Map<String, dynamic> otherData;
+  final Map<String, dynamic>? otherData;
 
   Insight({
     required this.steps,
@@ -26,7 +26,7 @@ class Insight {
     this.comment,
     this.launchReady = false, // Default value
     this.flag,
-    required this.otherData,
+    this.otherData,
   });
 
   factory Insight.fromJson(Map<String, dynamic> json) {
@@ -105,7 +105,9 @@ class Insight {
       }
     }
 
-    result.addAll(otherData);
+    if (otherData != null) {
+      result.addAll(otherData!);
+    }
 
     return result;
   }
