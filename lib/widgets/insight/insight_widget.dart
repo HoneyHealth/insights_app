@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:insights_app/models.dart';
+import 'package:insights_app/models/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import 'insight_widget.desktop.dart';
