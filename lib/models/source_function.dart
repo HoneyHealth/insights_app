@@ -10,7 +10,7 @@ class SourceFunction {
   factory SourceFunction.fromJson(Map<String, dynamic> jsonData) {
     return SourceFunction(
         name: jsonData['name'] ?? "NOT PROVIDED",
-        sourceData: jsonData['sourceData'] == null
+        sourceData: jsonData['source_data'] == null
             ? null
             : json.decode(jsonData['source_data']) as Map<String, dynamic>);
   }
