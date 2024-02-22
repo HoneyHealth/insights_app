@@ -89,6 +89,7 @@ class OverallInsightSummaryPage extends StatelessWidget {
       // Directly use the config in the toJson method
       final jsonString = jsonEncode(cubit.state.toJson(config));
 
+      if (!context.mounted) return;
       Navigator.push(
         context,
         platformPageRoute(
