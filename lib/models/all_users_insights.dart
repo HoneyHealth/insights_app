@@ -12,6 +12,9 @@ class AllUsersInsights {
   int get insightCount =>
       userInsights.values.fold(0, (acc, insights) => acc + insights.length);
 
+  List<Insight> get allInsights =>
+      userInsights.values.fold([], (acc, insights) => acc + insights);
+
   factory AllUsersInsights.fromJson(Map<String, dynamic> json) {
     Map<String, List<Insight>> userInsights = {};
 
