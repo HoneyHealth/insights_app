@@ -55,7 +55,7 @@ class Insight {
 
     return Insight(
       insightId: json['insight_id'],
-      userId: json['user_id'] ?? "something",
+      userId: json['user_id'],
       steps: json.containsKey('steps') ? List<String>.from(json['steps']) : [],
       title: json['title'] ?? "NOT PROVIDED",
       insight: json['insight'] ?? "NOT PROVIDED",
