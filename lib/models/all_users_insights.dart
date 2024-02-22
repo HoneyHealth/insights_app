@@ -3,7 +3,14 @@ import 'models.dart';
 class AllUsersInsights {
   final Map<String, UserInsights> userInsights;
 
-  AllUsersInsights({required this.userInsights});
+  AllUsersInsights({
+    required this.userInsights,
+  });
+
+  int get userCount => userInsights.length;
+
+  int get insightCount => userInsights.values
+      .fold(0, (acc, userInsight) => acc + userInsight.insights.length);
 
   factory AllUsersInsights.fromJson(Map<String, dynamic> json) {
     Map<String, UserInsights> userInsights = {};
