@@ -1,7 +1,7 @@
 import 'models.dart';
 
 class AllUsersInsights {
-  final Map<String, UserInsights> userInsights;
+  final Map<String, List<Insight>> userInsights;
 
   AllUsersInsights({
     required this.userInsights,
@@ -9,16 +9,21 @@ class AllUsersInsights {
 
   int get userCount => userInsights.length;
 
-  int get insightCount => userInsights.values
-      .fold(0, (acc, userInsight) => acc + userInsight.insights.length);
+  int get insightCount =>
+      userInsights.values.fold(0, (acc, insights) => acc + insights.length);
 
   factory AllUsersInsights.fromJson(Map<String, dynamic> json) {
-    Map<String, UserInsights> userInsights = {};
+    Map<String, List<Insight>> userInsights = {};
 
     json.forEach((key, value) {
       if (value is List) {
-        userInsights[key] =
-            UserInsights.fromJson(value.cast<Map<String, dynamic>>());
+        userInsights[key] = (value)
+            .map(
+              (i) => Insight.fromJson(
+                {...i as Map<String, dynamic>, "user_id": key},
+              ),
+            )
+            .toList();
       } else {
         // Handle other unexpected formats or log an error
       }
@@ -33,24 +38,26 @@ class AllUsersInsights {
     // Check if launchReady export filter is on
     bool launchReadyFilter = config?.exportLaunchReadyOnly == true;
 
-    Map<String, UserInsights> filteredUserInsights = {};
+    Map<String, List<Insight>> filteredUserInsights = {};
 
-    userInsights.forEach((userId, userInsight) {
+    userInsights.forEach((userId, insights) {
       // If launchReady export filter is on, remove users with no launch-ready insights
       if (launchReadyFilter) {
-        if (userInsight.insights.any((insight) => insight.launchReady)) {
-          filteredUserInsights[userId] = userInsight;
+        List<Insight> launchReadyInsights =
+            insights.where((insight) => insight.launchReady).toList();
+        if (launchReadyInsights.isNotEmpty) {
+          filteredUserInsights[userId] = launchReadyInsights;
         }
       } else {
-        filteredUserInsights[userId] = userInsight;
+        filteredUserInsights[userId] = insights;
       }
     });
 
     if (config == null ||
         config.insights == CheckState.checked ||
         config.insights == CheckState.halfChecked) {
-      result =
-          filteredUserInsights.map((k, v) => MapEntry(k, v.toJson(config)));
+      result = filteredUserInsights
+          .map((k, v) => MapEntry(k, v.map((e) => e.toJson(config)).toList()));
     }
 
     return result;

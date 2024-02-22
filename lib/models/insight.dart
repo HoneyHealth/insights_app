@@ -1,6 +1,8 @@
 import 'models.dart';
 
 class Insight {
+  final String insightId;
+  final String userId;
   final List<String> steps;
   final String title;
   final String insight;
@@ -16,6 +18,8 @@ class Insight {
   final Map<String, dynamic>? otherData;
 
   Insight({
+    required this.insightId,
+    required this.userId,
     required this.steps,
     required this.title,
     required this.insight,
@@ -33,7 +37,9 @@ class Insight {
     // Extract other keys and values from the JSON
     Map<String, dynamic> otherData = {};
     json.forEach((key, value) {
-      if (key != 'steps' &&
+      if (key != 'insight_id' &&
+          key != 'user_id' &&
+          key != 'steps' &&
           key != 'title' &&
           key != 'insight' &&
           key != 'next_steps' &&
@@ -48,6 +54,8 @@ class Insight {
     });
 
     return Insight(
+      insightId: json['insight_id'],
+      userId: json['user_id'] ?? "something",
       steps: json.containsKey('steps') ? List<String>.from(json['steps']) : [],
       title: json['title'] ?? "NOT PROVIDED",
       insight: json['insight'] ?? "NOT PROVIDED",

@@ -31,12 +31,8 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
   }
 
   String getInsightProgressText() {
-    final insights = context
-            .read<InsightCubit>()
-            .state
-            .userInsights[widget.userId]
-            ?.insights ??
-        [];
+    final insights =
+        context.read<InsightCubit>().state.userInsights[widget.userId] ?? [];
     return "${currentInsightIndex + 1}/${insights.length} insights";
   }
 
@@ -49,7 +45,7 @@ class _UserInsightsPageState extends State<UserInsightsPage> {
       iosContentPadding: true,
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
-          var insights = state.userInsights[widget.userId]?.insights ?? [];
+          var insights = state.userInsights[widget.userId] ?? [];
 
           if (insights.isEmpty) return const Text("No insights available.");
 
