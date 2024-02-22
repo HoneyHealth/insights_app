@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:insights_app/main.dart';
 import 'package:insights_app/models/models.dart';
 import 'package:insights_app/widgets/insight/insight_widget.dart';
+import 'package:insights_app/widgets/insight_summary_page.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-import 'insights_cubit.dart';
+import '../insights_cubit.dart';
 
 class UserInsightsPage extends StatefulWidget {
   final String userId;
