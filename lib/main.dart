@@ -81,7 +81,7 @@ class JsonInputPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text("Load Insights JSON"),
+        title: const Text("Load Insights JSON"),
       ),
       body: const Center(
         child: JsonInputWidget(),
@@ -131,7 +131,7 @@ class _JsonInputWidgetState extends State<JsonInputWidget> {
               onPressed: () {
                 _loadJson(context);
               },
-              child: Text("Load JSON"),
+              child: const Text("Load JSON"),
             ),
           ],
         ),
@@ -178,7 +178,7 @@ class UserSelectionPage extends StatelessWidget {
     [] + [];
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text("Select a User"),
+        title: const Text("Select a User"),
       ),
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
@@ -396,15 +396,14 @@ class OverallInsightSummaryPage extends StatelessWidget {
     final config = await showPlatformDialog<ExportConfig>(
       context: context,
       builder: (BuildContext context) =>
-          ExportConfigPage(config: cubit.exportConfig), // Updated this line
+          ExportConfigPage(config: cubit.exportConfig),
     );
 
     if (config != null) {
       // Update the cubit's exportConfig
       cubit.exportConfig = config;
       // Directly use the config in the toJson method
-      final jsonString =
-          jsonEncode(context.read<InsightCubit>().state.toJson(config));
+      final jsonString = jsonEncode(cubit.state.toJson(config));
 
       Navigator.push(
         context,
@@ -420,10 +419,10 @@ class OverallInsightSummaryPage extends StatelessWidget {
 class ExportConfigPage extends StatefulWidget {
   final ExportConfig config;
 
-  ExportConfigPage({required this.config, super.key});
+  const ExportConfigPage({required this.config, super.key});
 
   @override
-  _ExportConfigPageState createState() => _ExportConfigPageState();
+  State<ExportConfigPage> createState() => _ExportConfigPageState();
 }
 
 class _ExportConfigPageState extends State<ExportConfigPage> {

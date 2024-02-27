@@ -35,7 +35,7 @@ class InsightDesktopWidget extends StatelessWidget {
         constraints: constraints,
         separatorColor: Theme.of(context).dividerColor,
         separatorThickness: 4.0,
-        fractions: [0.5, 0.5],
+        fractions: const [0.5, 0.5],
         children: [
           SingleChildScrollView(
             child: SizedBox(

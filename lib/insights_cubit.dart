@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:insights_app/models/models.dart';
 
 class InsightCubit extends Cubit<AllUsersInsights> {
-  InsightCubit(AllUsersInsights initialState) : super(initialState);
+  InsightCubit(super.initialState);
   ExportConfig exportConfig = ExportConfig();
 
   void updateInsights(AllUsersInsights insights) {
