@@ -14,12 +14,6 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 env:
   BUILD_PATH: "." # default value when not using subfolders
   # BUILD_PATH: subfolder
@@ -28,6 +22,12 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+
+    # Use a dynamic concurrency group for the build job to cancel previous builds on the same branch
+    concurrency:
+      group: build-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -62,6 +62,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     name: Deploy
+
+    # Use a separate concurrency group for the deploy job to ensure it completes once started
+    concurrency:
+      group: deploy-${{ github.ref }}
+      cancel-in-progress: false
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
