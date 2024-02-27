@@ -41,6 +41,7 @@ dependencies:
   desktop_split_pane: ^1.0.3
   flutter_platform_widgets: ^6.1.0
   json_annotation: ^4.8.1
+  horizontal_data_table: ^4.3.1
 
 dev_dependencies:
   flutter_test:
