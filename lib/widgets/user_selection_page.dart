@@ -42,7 +42,7 @@ class UserSelectionPage extends StatelessWidget {
                         DataColumn(
                           label: Expanded(
                             child: Text(
-                              'User ID',
+                              'Insight ID',
                               style: TextStyle(fontStyle: FontStyle.italic),
                             ),
                           ),
@@ -58,7 +58,7 @@ class UserSelectionPage extends StatelessWidget {
                         DataColumn(
                           label: Expanded(
                             child: Text(
-                              'Insight ID',
+                              'User ID',
                               style: TextStyle(fontStyle: FontStyle.italic),
                             ),
                           ),
@@ -96,7 +96,7 @@ class UserSelectionPage extends StatelessWidget {
         DataCell(
           PlatformListTile(
             title: Text(
-              insights[index].userId,
+              insights[index].insightId,
               style: TextStyle(
                 color: Theme.of(context).primaryColor,
               ),
@@ -120,7 +120,7 @@ class UserSelectionPage extends StatelessWidget {
           ),
         ),
         DataCell(Text(insights[index].title)),
-        DataCell(Text(insights[index].insightId)),
+        DataCell(Text(insights[index].userId)),
       ],
     );
   }
