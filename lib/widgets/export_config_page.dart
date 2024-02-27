@@ -48,6 +48,8 @@ class _ExportConfigPageState extends State<ExportConfigPage> {
                 'sourceFunctions', 2),
             buildChildTile("Source Name", config.sourceName, 'sourceName', 3),
             buildChildTile("Source Data", config.sourceData, 'sourceData', 3),
+            buildChildTile("Referenced Insights", config.referencedInsights,
+                'referencedInsights', 2),
             const Divider(),
             buildChildTile(
                 "Review Metadata", config.reviewMetadata, 'reviewMetadata', 2),

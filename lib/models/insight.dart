@@ -9,6 +9,7 @@ class Insight {
   final String nextSteps;
   final List<SourceFunction> sourceFunctions;
   final String lastGlucoseDataPointTimestampForInsight;
+  final List<String> referencedInsightIds;
   double? rating;
 
   String? comment; // can be null if no feedback given
@@ -26,6 +27,7 @@ class Insight {
     required this.nextSteps,
     required this.sourceFunctions,
     required this.lastGlucoseDataPointTimestampForInsight,
+    this.referencedInsightIds = const [],
     this.rating,
     this.comment,
     this.launchReady = false, // Default value
@@ -48,7 +50,8 @@ class Insight {
           key != 'rating' &&
           key != 'critique' &&
           key != 'launch_ready' &&
-          key != 'flag') {
+          key != 'flag' &&
+          key != 'referenced_insights') {
         otherData[key] = value;
       }
     });
@@ -73,6 +76,9 @@ class Insight {
           ? Flag(
               reason: json['flag']['reason'], comment: json['flag']['comment'])
           : null,
+      referencedInsightIds: json['referenced_insights'] != null
+          ? List<String>.from(json['referenced_insights'])
+          : [],
       otherData: otherData,
     );
   }
@@ -114,6 +120,9 @@ class Insight {
       if (config == null || config.flag == CheckState.checked && flag != null) {
         result['flag'] = flag!.toJson();
       }
+    }
+    if (config == null || config.referencedInsights == CheckState.checked) {
+      result['referenced_insights'] = referencedInsightIds;
     }
 
     if (otherData != null) {
