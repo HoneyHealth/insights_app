@@ -51,7 +51,7 @@ jobs:
           flutter build web --base-href '/${{ env.REPO_NAME }}/'
         working-directory: ${{ env.BUILD_PATH }}
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ env.BUILD_PATH }}/build/web
 
