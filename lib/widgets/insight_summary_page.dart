@@ -52,7 +52,7 @@ class InsightSummaryPage extends StatelessWidget {
       ),
       body: BlocBuilder<InsightCubit, AllUsersInsights>(
         builder: (context, state) {
-          final insights = state.userInsights[userId]?.insights ?? [];
+          final insights = state.userInsights[userId] ?? [];
 
           return ListView.builder(
             itemCount: insights.length,

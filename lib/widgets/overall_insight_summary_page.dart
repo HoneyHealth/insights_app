@@ -34,7 +34,7 @@ class OverallInsightSummaryPage extends StatelessWidget {
             itemCount: state.userInsights.keys.length,
             itemBuilder: (context, index) {
               final userId = state.userInsights.keys.elementAt(index);
-              final insights = state.userInsights[userId]?.insights ?? [];
+              final insights = state.userInsights[userId] ?? [];
               return CustomExpansionTile(
                 title: Text("User: $userId"),
                 children: insights.map((insight) {

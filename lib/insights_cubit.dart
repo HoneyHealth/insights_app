@@ -14,8 +14,7 @@ class InsightCubit extends Cubit<AllUsersInsights> {
         AllUsersInsights(userInsights: {...state.userInsights});
 
     final userInsights = insightsCopy.userInsights[userId];
-    final targetInsight =
-        userInsights!.insights.firstWhere((i) => i == insight);
+    final targetInsight = userInsights!.firstWhere((i) => i == insight);
     targetInsight.rating = rating;
 
     emit(insightsCopy);
@@ -26,8 +25,7 @@ class InsightCubit extends Cubit<AllUsersInsights> {
         AllUsersInsights(userInsights: {...state.userInsights});
 
     final userInsights = insightsCopy.userInsights[userId];
-    final targetInsight =
-        userInsights!.insights.firstWhere((i) => i == insight);
+    final targetInsight = userInsights!.firstWhere((i) => i == insight);
     targetInsight.comment = comment;
 
     emit(insightsCopy);
@@ -38,8 +36,7 @@ class InsightCubit extends Cubit<AllUsersInsights> {
         AllUsersInsights(userInsights: {...state.userInsights});
 
     final userInsights = insightsCopy.userInsights[userId];
-    final targetInsight =
-        userInsights!.insights.firstWhere((i) => i == insight);
+    final targetInsight = userInsights!.firstWhere((i) => i == insight);
     targetInsight.launchReady = !targetInsight.launchReady; // Toggle the value
 
     emit(insightsCopy);
@@ -51,8 +48,7 @@ class InsightCubit extends Cubit<AllUsersInsights> {
         AllUsersInsights(userInsights: {...state.userInsights});
 
     final userInsights = insightsCopy.userInsights[userId];
-    final targetInsight =
-        userInsights!.insights.firstWhere((i) => i == insight);
+    final targetInsight = userInsights!.firstWhere((i) => i == insight);
     targetInsight.flag = Flag(reason: reason, comment: comment);
 
     // Disabling launch ready if the insight is flagged
@@ -66,8 +62,7 @@ class InsightCubit extends Cubit<AllUsersInsights> {
         AllUsersInsights(userInsights: {...state.userInsights});
 
     final userInsights = insightsCopy.userInsights[userId];
-    final targetInsight =
-        userInsights!.insights.firstWhere((i) => i == insight);
+    final targetInsight = userInsights!.firstWhere((i) => i == insight);
     targetInsight.flag = null;
 
     emit(insightsCopy);
