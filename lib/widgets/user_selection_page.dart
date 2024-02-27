@@ -32,11 +32,16 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
             // Sort the insights if a sort column is selected
             if (_sortColumnIndex != null) {
               insights.sort((a, b) {
-                int aValue = a.sourceFunctions.length;
-                int bValue = b.sourceFunctions.length;
-                return _isAscending
-                    ? aValue.compareTo(bValue)
-                    : bValue.compareTo(aValue);
+                switch (_sortColumnIndex) {
+                  case 2: // Source Functions Count
+                    return _compareValues(
+                        a.sourceFunctions.length, b.sourceFunctions.length);
+                  case 3: // Referenced Insights Count
+                    return _compareValues(a.referencedInsightIds.length,
+                        b.referencedInsightIds.length);
+                  default:
+                    return 0;
+                }
               });
             }
 
@@ -81,14 +86,17 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
                             style: TextStyle(fontStyle: FontStyle.italic),
                           ),
                           onSort: (columnIndex, ascending) {
-                            setState(() {
-                              if (_sortColumnIndex == columnIndex) {
-                                _isAscending = ascending;
-                              } else {
-                                _sortColumnIndex = columnIndex;
-                                _isAscending = true;
-                              }
-                            });
+                            _onSort(columnIndex, ascending);
+                          },
+                        ),
+                        DataColumn(
+                          numeric: true,
+                          label: const Text(
+                            'Referenced Insights Count',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                          onSort: (columnIndex, ascending) {
+                            _onSort(columnIndex, ascending);
                           },
                         ),
                         const DataColumn(
@@ -118,6 +126,21 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
         ),
       ),
     );
+  }
+
+  void _onSort(int columnIndex, bool ascending) {
+    setState(() {
+      if (_sortColumnIndex == columnIndex) {
+        _isAscending = ascending;
+      } else {
+        _sortColumnIndex = columnIndex;
+        _isAscending = true;
+      }
+    });
+  }
+
+  int _compareValues(int aValue, int bValue) {
+    return _isAscending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
   }
 
   DataRow getInsightDataRow(
@@ -157,6 +180,11 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
         DataCell(
           Text(
             insights[index].sourceFunctions.length.toString(),
+          ),
+        ),
+        DataCell(
+          Text(
+            insights[index].referencedInsightIds.length.toString(),
           ),
         ),
         DataCell(Text(insights[index].userId)),
