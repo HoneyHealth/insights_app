@@ -7,8 +7,16 @@ import 'package:responsive_builder/responsive_builder.dart';
 
 import 'insights_page.dart';
 
-class UserSelectionPage extends StatelessWidget {
+class UserSelectionPage extends StatefulWidget {
   const UserSelectionPage({super.key});
+
+  @override
+  State<UserSelectionPage> createState() => _UserSelectionPageState();
+}
+
+class _UserSelectionPageState extends State<UserSelectionPage> {
+  int? _sortColumnIndex; // Start with no column sorted
+  bool _isAscending = true;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +27,19 @@ class UserSelectionPage extends StatelessWidget {
       body: SafeArea(
         child: BlocBuilder<InsightCubit, AllUsersInsights>(
           builder: (context, state) {
+            List<Insight> insights = List.from(state.allInsights);
+
+            // Sort the insights if a sort column is selected
+            if (_sortColumnIndex != null) {
+              insights.sort((a, b) {
+                int aValue = a.sourceFunctions.length;
+                int bValue = b.sourceFunctions.length;
+                return _isAscending
+                    ? aValue.compareTo(bValue)
+                    : bValue.compareTo(aValue);
+              });
+            }
+
             return Center(
               child: Container(
                 margin: const EdgeInsets.all(24),
@@ -38,39 +59,52 @@ class UserSelectionPage extends StatelessWidget {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
-                      columns: const <DataColumn>[
-                        DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'Insight ID',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
+                      sortColumnIndex: _sortColumnIndex,
+                      sortAscending: _isAscending,
+                      columns: <DataColumn>[
+                        const DataColumn(
+                          label: Text(
+                            'Insight ID',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                        const DataColumn(
+                          label: Text(
+                            'Insight Title',
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
                         DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'Insight Title',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
+                          numeric: true,
+                          label: const Text(
+                            'Source Functions Count',
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
+                          onSort: (columnIndex, ascending) {
+                            setState(() {
+                              if (_sortColumnIndex == columnIndex) {
+                                _isAscending = ascending;
+                              } else {
+                                _sortColumnIndex = columnIndex;
+                                _isAscending = true;
+                              }
+                            });
+                          },
                         ),
-                        DataColumn(
-                          label: Expanded(
-                            child: Text(
-                              'User ID',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
+                        const DataColumn(
+                          label: Text(
+                            'User ID',
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
                       ],
-                      rows: state.allInsights
+                      rows: insights
                           .asMap()
                           .entries
                           .map(
                             (entry) => getInsightDataRow(
                               entry.key,
-                              state.allInsights,
+                              insights,
                               context,
                             ),
                           )
@@ -120,6 +154,11 @@ class UserSelectionPage extends StatelessWidget {
           ),
         ),
         DataCell(Text(insights[index].title)),
+        DataCell(
+          Text(
+            insights[index].sourceFunctions.length.toString(),
+          ),
+        ),
         DataCell(Text(insights[index].userId)),
       ],
     );
