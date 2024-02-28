@@ -43,7 +43,8 @@ class _InsightsPageState extends State<InsightsPage> {
     return BlocBuilder<InsightCubit, AllUsersInsights>(
       builder: (context, state) => PlatformScaffold(
         appBar: PlatformAppBar(
-          title: const Text("Insights"),
+          title: Text(
+              "Insights for ${widget.insights[currentInsightIndex].userId}"),
         ),
         iosContentPadding: true,
         body: Column(
