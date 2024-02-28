@@ -129,6 +129,7 @@ class Insight {
       result.addAll(otherData!);
     }
 
+    result["insight_id"] = insightId;
     result["launch_ready"] = launchReady;
 
     return result;
