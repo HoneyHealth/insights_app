@@ -54,6 +54,9 @@ class MyApp extends StatelessWidget {
     );
 
     return PlatformProvider(
+      settings: PlatformSettingsData(
+        iosUsesMaterialWidgets: true,
+      ),
       builder: (context) => PlatformTheme(
         themeMode: ThemeMode.system,
         materialLightTheme: materialLightTheme,
