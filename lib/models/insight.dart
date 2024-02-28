@@ -129,6 +129,8 @@ class Insight {
       result.addAll(otherData!);
     }
 
+    result["launch_ready"] = launchReady;
+
     return result;
   }
 }
