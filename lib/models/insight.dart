@@ -3,7 +3,6 @@ import 'models.dart';
 class Insight {
   final String insightId;
   final String userId;
-  final List<String> steps;
   final String title;
   final String insight;
   final String nextSteps;
@@ -21,7 +20,6 @@ class Insight {
   Insight({
     required this.insightId,
     required this.userId,
-    required this.steps,
     required this.title,
     required this.insight,
     required this.nextSteps,
@@ -41,7 +39,6 @@ class Insight {
     json.forEach((key, value) {
       if (key != 'insight_id' &&
           key != 'user_id' &&
-          key != 'steps' &&
           key != 'title' &&
           key != 'insight' &&
           key != 'next_steps' &&
@@ -59,7 +56,6 @@ class Insight {
     return Insight(
       insightId: json['insight_id'],
       userId: json['user_id'],
-      steps: json.containsKey('steps') ? List<String>.from(json['steps']) : [],
       title: json['title'] ?? "NOT PROVIDED",
       insight: json['insight'] ?? "NOT PROVIDED",
       nextSteps: json['next_steps'] ?? "NOT PROVIDED",
