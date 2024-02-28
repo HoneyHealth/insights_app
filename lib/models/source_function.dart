@@ -24,7 +24,7 @@ class SourceFunction {
     }
     if ((config == null || config.sourceData == CheckState.checked) &&
         sourceData != null) {
-      result['source_data'] = sourceData;
+      result['source_data'] = jsonEncode(sourceData);
     }
 
     return result;
