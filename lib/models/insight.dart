@@ -28,7 +28,7 @@ class Insight {
     this.referencedInsightIds = const [],
     this.rating,
     this.comment,
-    this.launchReady = false, // Default value
+    this.launchReady = true,
     this.flag,
     this.otherData,
   });
