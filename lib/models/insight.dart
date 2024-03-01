@@ -1,6 +1,8 @@
 import 'models.dart';
 
 class Insight {
+  static const bool _kDefaultLaunchReady = true;
+
   final String insightId;
   final String userId;
   final String title;
@@ -28,7 +30,7 @@ class Insight {
     this.referencedInsightIds = const [],
     this.rating,
     this.comment,
-    this.launchReady = true,
+    this.launchReady = _kDefaultLaunchReady,
     this.flag,
     this.otherData,
   });
@@ -67,7 +69,7 @@ class Insight {
           json['last_glucose_data_point_timestamp_for_insight'] ?? "unknown",
       rating: json['rating'] != null ? (json['rating'] + 0.0) as double : null,
       comment: json['critique'],
-      launchReady: json['launch_ready'] ?? false,
+      launchReady: json['launch_ready'] ?? _kDefaultLaunchReady,
       flag: json['flag'] != null
           ? Flag(
               reason: json['flag']['reason'], comment: json['flag']['comment'])
