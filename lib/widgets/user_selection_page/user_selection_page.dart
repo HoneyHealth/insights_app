@@ -181,6 +181,21 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    PlatformTextButton(
+                                      child: const Text("Import New JSON "),
+                                      onPressed: () =>
+                                          Navigator.pushReplacement(
+                                        context,
+                                        platformPageRoute(
+                                          context: context,
+                                          builder: (context) =>
+                                              const JsonInputPage(),
+                                        ),
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
