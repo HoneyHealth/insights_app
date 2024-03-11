@@ -9,6 +9,30 @@ class AllUsersInsights {
 
   int get userCount => userInsights.length;
 
+  int get launchReadyInsightsCount =>
+      userInsights.values.fold(0, (previousValue, insights) {
+        return previousValue +
+            insights.where((insight) => insight.launchReady).length;
+      });
+
+  int get commentedInsightsCount =>
+      userInsights.values.fold(0, (previousValue, insights) {
+        return previousValue +
+            insights.where((insight) => insight.comment != null).length;
+      });
+
+  int get flaggedInsightsCount =>
+      userInsights.values.fold(0, (previousValue, insights) {
+        return previousValue +
+            insights.where((insight) => insight.flag != null).length;
+      });
+
+  int get fiveStarInsightsCount =>
+      userInsights.values.fold(0, (previousValue, insights) {
+        return previousValue +
+            insights.where((insight) => insight.rating == 5).length;
+      });
+
   int get insightCount =>
       userInsights.values.fold(0, (acc, insights) => acc + insights.length);
 
