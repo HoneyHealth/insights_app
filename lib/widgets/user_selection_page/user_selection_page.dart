@@ -7,8 +7,16 @@ import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-import 'insights_page.dart';
-import 'widgets.dart';
+import '../insights_page.dart';
+import '../widgets.dart';
+import 'widgets/widgets.dart';
+
+enum InsightFilter {
+  launchReady,
+  commented,
+  fiveStar,
+  flagged,
+}
 
 class UserSelectionPage extends StatefulWidget {
   const UserSelectionPage({super.key});
@@ -21,6 +29,25 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
   int? _sortColumnIndex; // Start with no column sorted
   bool _isAscending = true;
 
+  final Map<InsightFilter, bool> _filters = {
+    InsightFilter.launchReady: false,
+    InsightFilter.commented: false,
+    InsightFilter.fiveStar: false,
+    InsightFilter.flagged: false,
+  };
+
+  void _onCardTap(InsightFilter filter) {
+    setState(() {
+      // Deselect all filters if the tapped filter is already selected
+      if (_filters[filter]!) {
+        _filters.updateAll((key, value) => false);
+      } else {
+        // Deselect the previously selected filter and select the tapped filter
+        _filters.updateAll((key, value) => key == filter);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlatformScaffold(
@@ -31,6 +58,21 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
         child: BlocBuilder<InsightCubit, AllUsersInsights>(
           builder: (context, state) {
             List<Insight> insights = List.from(state.allInsights);
+
+            // Apply filters
+            if (_filters[InsightFilter.launchReady]!) {
+              insights =
+                  insights.where((insight) => insight.launchReady).toList();
+            } else if (_filters[InsightFilter.commented]!) {
+              insights =
+                  insights.where((insight) => insight.comment != null).toList();
+            } else if (_filters[InsightFilter.fiveStar]!) {
+              insights =
+                  insights.where((insight) => insight.rating == 5).toList();
+            } else if (_filters[InsightFilter.flagged]!) {
+              insights =
+                  insights.where((insight) => insight.flag != null).toList();
+            }
 
             // Sort the insights if a sort column is selected
             if (_sortColumnIndex != null) {
@@ -70,85 +112,33 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
                       ),
                       child: Row(
                         children: [
-                          Card.outlined(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                children: [
-                                  const Text("Launch Ready Insights"),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    "${state.launchReadyInsightsCount} / ${state.insightCount}",
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          InsightFilterCard(
+                            title: "Launch Ready Insights",
+                            count: state.launchReadyInsightsCount,
+                            total: state.insightCount,
+                            isSelected: _filters[InsightFilter.launchReady]!,
+                            onTap: () => _onCardTap(InsightFilter.launchReady),
                           ),
-                          Card.outlined(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                children: [
-                                  const Text("Commented Insights"),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    "${state.commentedInsightsCount} / ${state.insightCount}",
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          InsightFilterCard(
+                            title: "Commented Insights",
+                            count: state.commentedInsightsCount,
+                            total: state.insightCount,
+                            isSelected: _filters[InsightFilter.commented]!,
+                            onTap: () => _onCardTap(InsightFilter.commented),
                           ),
-                          Card.outlined(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                children: [
-                                  const Text("5 Star Insights"),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    "${state.fiveStarInsightsCount} / ${state.insightCount}",
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          InsightFilterCard(
+                            title: "5 Star Insights",
+                            count: state.fiveStarInsightsCount,
+                            total: state.insightCount,
+                            isSelected: _filters[InsightFilter.fiveStar]!,
+                            onTap: () => _onCardTap(InsightFilter.fiveStar),
                           ),
-                          Card.outlined(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                children: [
-                                  const Text("Flagged Insights"),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    "${state.flaggedInsightsCount} / ${state.insightCount}",
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          InsightFilterCard(
+                            title: "Flagged Insights",
+                            count: state.flaggedInsightsCount,
+                            total: state.insightCount,
+                            isSelected: _filters[InsightFilter.flagged]!,
+                            onTap: () => _onCardTap(InsightFilter.flagged),
                           ),
                         ],
                       ),
