@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -6,6 +8,7 @@ import 'package:insights_app/models/models.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 import 'insights_page.dart';
+import 'widgets.dart';
 
 class UserSelectionPage extends StatefulWidget {
   const UserSelectionPage({super.key});
@@ -45,81 +48,216 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
               });
             }
 
+            double horizontalPadding = getValueForScreenType(
+              context: context,
+              mobile: 16.0,
+              tablet: 24.0,
+            );
+
             return Center(
-              child: Container(
-                margin: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                constraints: BoxConstraints(
-                  maxWidth: getValueForScreenType(
-                    context: context,
-                    mobile: 600,
-                    tablet: 900,
-                    desktop: 1200,
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      sortColumnIndex: _sortColumnIndex,
-                      sortAscending: _isAscending,
-                      columns: <DataColumn>[
-                        const DataColumn(
-                          label: Text(
-                            'Insight ID',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        const DataColumn(
-                          label: Text(
-                            'Insight Title',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        DataColumn(
-                          numeric: true,
-                          label: const Text(
-                            'Source Functions Count',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                          onSort: (columnIndex, ascending) {
-                            _onSort(columnIndex, ascending);
-                          },
-                        ),
-                        DataColumn(
-                          numeric: true,
-                          label: const Text(
-                            'Referenced Insights Count',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                          onSort: (columnIndex, ascending) {
-                            _onSort(columnIndex, ascending);
-                          },
-                        ),
-                        const DataColumn(
-                          label: Text(
-                            'User ID',
-                            style: TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                      ],
-                      rows: insights
-                          .asMap()
-                          .entries
-                          .map(
-                            (entry) => getInsightDataRow(
-                              entry.key,
-                              insights,
-                              context,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                        vertical: 16.0,
+                      ),
+                      child: Row(
+                        children: [
+                          Card.outlined(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  const Text("Launch Ready Insights"),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "${state.launchReadyInsightsCount} / ${state.insightCount}",
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                          Card.outlined(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  const Text("Commented Insights"),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "${state.commentedInsightsCount} / ${state.insightCount}",
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Card.outlined(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  const Text("5 Star Insights"),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "${state.fiveStarInsightsCount} / ${state.insightCount}",
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Card.outlined(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  const Text("Flagged Insights"),
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    "${state.flaggedInsightsCount} / ${state.insightCount}",
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            left: horizontalPadding,
+                            right: horizontalPadding,
+                            bottom: 128,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    PlatformElevatedButton(
+                                      child: const Text("Export"),
+                                      onPressed: () =>
+                                          _showExportConfigDialog(context),
+                                      material: (context, __) =>
+                                          MaterialElevatedButtonData(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          foregroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              DataTable(
+                                sortColumnIndex: _sortColumnIndex,
+                                sortAscending: _isAscending,
+                                columns: <DataColumn>[
+                                  const DataColumn(
+                                    label: Text(
+                                      'Insight ID',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                  ),
+                                  const DataColumn(
+                                    label: Text(
+                                      'Insight Title',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    numeric: true,
+                                    label: const Text(
+                                      'Source Functions Count',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    onSort: (columnIndex, ascending) {
+                                      _onSort(columnIndex, ascending);
+                                    },
+                                  ),
+                                  DataColumn(
+                                    numeric: true,
+                                    label: const Text(
+                                      'Referenced Insights Count',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    onSort: (columnIndex, ascending) {
+                                      _onSort(columnIndex, ascending);
+                                    },
+                                  ),
+                                  const DataColumn(
+                                    label: Text(
+                                      'User ID',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                  ),
+                                ],
+                                rows: insights
+                                    .asMap()
+                                    .entries
+                                    .map(
+                                      (entry) => getInsightDataRow(
+                                        entry.key,
+                                        insights,
+                                        context,
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -190,5 +328,30 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
         DataCell(Text(insights[index].userId)),
       ],
     );
+  }
+
+  Future<void> _showExportConfigDialog(BuildContext context) async {
+    final cubit = context.read<InsightCubit>();
+    final config = await showPlatformDialog<ExportConfig>(
+      context: context,
+      builder: (BuildContext context) =>
+          ExportConfigPage(config: cubit.exportConfig),
+    );
+
+    if (config != null) {
+      // Update the cubit's exportConfig
+      cubit.exportConfig = config;
+      // Directly use the config in the toJson method
+      final jsonString = jsonEncode(cubit.state.toJson(config));
+
+      if (!context.mounted) return;
+      Navigator.push(
+        context,
+        platformPageRoute(
+          context: context,
+          builder: (context) => ExportedJsonPage(jsonString: jsonString),
+        ),
+      );
+    }
   }
 }
