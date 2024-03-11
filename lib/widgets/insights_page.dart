@@ -86,14 +86,7 @@ class _InsightsPageState extends State<InsightsPage> {
                             currentInsightIndex++;
                           });
                         } else {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            platformPageRoute(
-                              context: context,
-                              builder: (context) => const UserSelectionPage(),
-                            ),
-                            (_) => false,
-                          );
+                          Navigator.pop(context);
                         }
                       },
                       child: Text(
