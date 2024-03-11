@@ -36,10 +36,13 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
             if (_sortColumnIndex != null) {
               insights.sort((a, b) {
                 switch (_sortColumnIndex) {
-                  case 2: // Source Functions Count
+                  case 0: // Is Launch Ready column
+                    return _compareValues(a.launchReady == true ? 1 : 0,
+                        b.launchReady == true ? 1 : 0);
+                  case 3: // Source Functions Count
                     return _compareValues(
                         a.sourceFunctions.length, b.sourceFunctions.length);
-                  case 3: // Referenced Insights Count
+                  case 4: // Referenced Insights Count
                     return _compareValues(a.referencedInsightIds.length,
                         b.referencedInsightIds.length);
                   default:
@@ -195,6 +198,16 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
                                 sortColumnIndex: _sortColumnIndex,
                                 sortAscending: _isAscending,
                                 columns: <DataColumn>[
+                                  DataColumn(
+                                    label: const Text(
+                                      'Is Launch Ready',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    onSort: (columnIndex, ascending) {
+                                      _onSort(columnIndex, ascending);
+                                    },
+                                  ),
                                   const DataColumn(
                                     label: Text(
                                       'Insight ID',
@@ -288,6 +301,12 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
   ) {
     return DataRow(
       cells: <DataCell>[
+        DataCell(
+          Checkbox(
+            value: insights[index].launchReady,
+            onChanged: null,
+          ),
+        ),
         DataCell(
           PlatformListTile(
             title: Text(
