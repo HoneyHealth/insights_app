@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.6
 
   desktop_split_pane: ^1.0.3
-  flutter_bloc: ^8.1.4
+  flutter_bloc: ^8.1.5
   flutter_platform_widgets: ^6.1.0
   flutter_rating_bar: ^4.0.1
   json_annotation: ^4.8.1
