@@ -32,6 +32,19 @@ class AllUsersInsights {
         return previousValue +
             insights.where((insight) => insight.rating == 5).length;
       });
+  
+  int get followUpInsightsCount =>
+      userInsights.values.fold(0, (previousValue, insights) {
+        return previousValue +
+            insights.where((insight) => insight.insightType.toLowerCase().contains('follow')).length;
+      });
+
+  int get netNewInsightsCount =>
+      userInsights.values.fold(0, (previousValue, insights) {
+        return previousValue +
+            insights.where((insight) => !insight.insightType.toLowerCase().contains('follow')).length;
+      });
+
 
   int get insightCount =>
       userInsights.values.fold(0, (acc, insights) => acc + insights.length);
