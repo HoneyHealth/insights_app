@@ -12,6 +12,8 @@ class Insight {
   final List<SourceFunction> sourceFunctions;
   final String lastGlucoseDataPointTimestampForInsight;
   final List<String> referencedInsightIds;
+  final List<PreviousInsight> previousInsights;
+
   double? rating;
 
   String? comment; // can be null if no feedback given
@@ -34,6 +36,7 @@ class Insight {
     this.comment,
     this.launchReady = _kDefaultLaunchReady,
     this.flag,
+    this.previousInsights = const [],
     this.otherData,
   });
 
@@ -55,7 +58,9 @@ class Insight {
           key != 'critique' &&
           key != 'launch_ready' &&
           key != 'flag' &&
-          key != 'referenced_insights') {
+          key != 'referenced_insights' &&
+          key != 'previous_insights'
+          ) {
         otherData[key] = value;
       }
     });
@@ -82,6 +87,11 @@ class Insight {
           : null,
       referencedInsightIds: json['referenced_insights'] != null
           ? List<String>.from(json['referenced_insights'])
+          : [],
+      previousInsights: json['previous_insights'] != null
+          ? (json['previous_insights'] as List?)
+              ?.map((pi) => PreviousInsight.fromJson(pi as Map<String, dynamic>))
+              .toList() ?? []
           : [],
       otherData: otherData,
     );
