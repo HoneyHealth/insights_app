@@ -7,6 +7,7 @@ class Insight {
   final String userId;
   final String title;
   final String insight;
+  final String insightType;
   final String nextSteps;
   final List<SourceFunction> sourceFunctions;
   final String lastGlucoseDataPointTimestampForInsight;
@@ -24,6 +25,7 @@ class Insight {
     required this.userId,
     required this.title,
     required this.insight,
+    required this.insightType,
     required this.nextSteps,
     required this.sourceFunctions,
     required this.lastGlucoseDataPointTimestampForInsight,
@@ -35,6 +37,8 @@ class Insight {
     this.otherData,
   });
 
+  String get insightLabel => insightType.toLowerCase().contains('follow') ? 'Follow Up Insight' : 'Net New Insight';
+
   factory Insight.fromJson(Map<String, dynamic> json) {
     // Extract other keys and values from the JSON
     Map<String, dynamic> otherData = {};
@@ -43,6 +47,7 @@ class Insight {
           key != 'user_id' &&
           key != 'title' &&
           key != 'insight' &&
+          key != 'insight_type' &&
           key != 'next_steps' &&
           key != 'source_functions' &&
           key != 'last_glucose_data_point_timestamp_for_insight' &&
@@ -60,6 +65,7 @@ class Insight {
       userId: json['user_id'],
       title: json['title'] ?? "NOT PROVIDED",
       insight: json['insight'] ?? "NOT PROVIDED",
+      insightType: json['insight_type'] ?? "NOT PROVIDED",
       nextSteps: json['next_steps'] ?? "NOT PROVIDED",
       sourceFunctions: (json['source_functions'] as List?)
               ?.map((sf) => SourceFunction.fromJson(sf as Map<String, dynamic>))

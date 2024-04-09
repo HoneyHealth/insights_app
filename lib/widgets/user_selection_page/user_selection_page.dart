@@ -16,6 +16,8 @@ enum InsightFilter {
   commented,
   fiveStar,
   flagged,
+  netNewInsight,
+  followUpInsight,
 }
 
 class UserSelectionPage extends StatefulWidget {
@@ -34,6 +36,8 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
     InsightFilter.commented: false,
     InsightFilter.fiveStar: false,
     InsightFilter.flagged: false,
+    InsightFilter.netNewInsight: false,
+    InsightFilter.followUpInsight: false,
   };
 
   void _onCardTap(InsightFilter filter) {
@@ -72,6 +76,10 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
             } else if (_filters[InsightFilter.flagged]!) {
               insights =
                   insights.where((insight) => insight.flag != null).toList();
+            } else if (_filters[InsightFilter.netNewInsight]!) {
+              insights = insights.where((insight) => !insight.insightType.toLowerCase().contains('follow')).toList();
+            } else if (_filters[InsightFilter.followUpInsight]!) {
+              insights = insights.where((insight) => insight.insightType.toLowerCase().contains('follow')).toList();
             }
 
             // Sort the insights if a sort column is selected
@@ -139,6 +147,20 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
                             total: state.insightCount,
                             isSelected: _filters[InsightFilter.flagged]!,
                             onTap: () => _onCardTap(InsightFilter.flagged),
+                          ),
+                          InsightFilterCard(
+                            title: "Follow Up Insights",
+                            count: state.followUpInsightsCount,
+                            total: state.insightCount,
+                            isSelected: _filters[InsightFilter.followUpInsight]!,
+                            onTap: () => _onCardTap(InsightFilter.followUpInsight),
+                          ),
+                          InsightFilterCard(
+                            title: "Net new Insights",
+                            count: state.netNewInsightsCount,
+                            total: state.insightCount,
+                            isSelected: _filters[InsightFilter.netNewInsight]!,
+                            onTap: () => _onCardTap(InsightFilter.netNewInsight),
                           ),
                         ],
                       ),
@@ -231,6 +253,17 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
                                     numeric: true,
                                     label: const Text(
                                       'Source Functions Count',
+                                      style: TextStyle(
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    onSort: (columnIndex, ascending) {
+                                      _onSort(columnIndex, ascending);
+                                    },
+                                  ),
+                                  DataColumn(
+                                    numeric: true,
+                                    label: const Text(
+                                      'Is net-new Insight?',
                                       style: TextStyle(
                                           fontStyle: FontStyle.italic),
                                     ),
@@ -342,6 +375,13 @@ class _UserSelectionPageState extends State<UserSelectionPage> {
         DataCell(
           Text(
             insights[index].sourceFunctions.length.toString(),
+          ),
+        ),
+        DataCell(
+          Text(
+            insights[index].insightType.toLowerCase().contains('follow')
+                ? 'No'
+                : 'Yes',
           ),
         ),
         DataCell(

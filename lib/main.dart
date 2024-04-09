@@ -5,11 +5,16 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:insights_app/insights_cubit.dart';
 import 'package:insights_app/models/models.dart';
 import 'package:insights_app/widgets/widgets.dart';
+import 'package:logger/logger.dart';
+
 
 import 'color_schemes.g.dart';
 
 void main() {
+  var logger = Logger();
+
   final insightCubit = InsightCubit(AllUsersInsights(userInsights: {}));
+  logger.i('The app has started!');
 
   runApp(
     BlocProvider(
