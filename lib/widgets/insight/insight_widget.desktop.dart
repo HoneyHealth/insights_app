@@ -60,9 +60,8 @@ class InsightDesktopWidget extends StatelessWidget {
                       ),
                     ),
                     SizedBox(
-                      height: 200, // Adjust the height as needed
+                      height: 300, 
                       child: SingleChildScrollView(
-                        // A scrollable list of PreviousInsightWidgets
                         child: Column(
                           children: insight.previousInsights
                               .map((previousInsight) => PreviousInsightWidget(previousInsight: previousInsight))
