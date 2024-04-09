@@ -4,6 +4,7 @@ import 'package:insights_app/models/models.dart';
 import 'package:insights_app/widgets/insight/widgets/source_functions_list.dart';
 
 import 'widgets/insight_details_widget.dart';
+import 'previous_insights/previous_insight_widget.dart';
 
 class InsightDesktopWidget extends StatelessWidget {
   final String userId;
@@ -48,6 +49,28 @@ class InsightDesktopWidget extends StatelessWidget {
                     userId: userId,
                     commentController: _commentController,
                   ),
+                  const SizedBox(height: 24), // Spacing
+
+                  if (insight.previousInsights.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        'Previous Insights',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 200, // Adjust the height as needed
+                      child: SingleChildScrollView(
+                        // A scrollable list of PreviousInsightWidgets
+                        child: Column(
+                          children: insight.previousInsights
+                              .map((previousInsight) => PreviousInsightWidget(previousInsight: previousInsight))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(
                     height: 132,
                   ),

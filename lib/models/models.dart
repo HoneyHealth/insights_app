@@ -3,3 +3,4 @@ export 'export_config.dart';
 export 'flag.dart';
 export 'insight.dart';
 export 'source_function.dart';
+export 'previous_insight.dart';

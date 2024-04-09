@@ -104,8 +104,8 @@ class _InsightsPageState extends State<InsightsPage> {
 
       return PlatformScaffold(
         appBar: PlatformAppBar(
-          title: Text(
-              "Insights for ${widget.insights[currentInsightIndex].userId}"),
+          title: SelectableText(
+              "Insights for ${widget.insights[currentInsightIndex].userId} - ${widget.insights[currentInsightIndex].insightLabel}"),
         ),
         iosContentPadding: true,
         body: Column(
